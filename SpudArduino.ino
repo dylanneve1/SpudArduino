@@ -1,11 +1,10 @@
-const int LEYE = A1; 
-const int REYE = A2;
+const int LEYE = 4; 
+const int REYE = 13;
 
-const in2
-const int R_MOTOR_IN1;
-const int R_MOTOR_IN2;
-const int L_MOTOR_IN1;
-const int L_MOTOR_IN2;
+const int R_MOTOR_IN1 = 6;
+const int R_MOTOR_IN2 = 5;
+const int L_MOTOR_IN1 = 11;
+const int L_MOTOR_IN2 = 12;
 
 #include "sensor.h"
 
@@ -23,6 +22,10 @@ void setup() {  // Begin serial
   // Sensor pins
   pinMode(LEYE, INPUT);
   pinMode(REYE, INPUT);
+  pinMode(L_MOTOR_IN1, OUTPUT);
+  pinMode(L_MOTOR_IN2, OUTPUT);
+  pinMode(R_MOTOR_IN1, OUTPUT);
+  pinMode(R_MOTOR_IN2, OUTPUT);
 }
 
 // IR Sensor Event
@@ -38,6 +41,10 @@ void ir_sensor_event(int event, int intensity, sensor_states &sstates) {
       sstates.ir_left = intensity;
       if (intensity == SENSOR_HIGH) {
         sstates.motor_left = true;
+        Serial.println("Left motor enabled!");
+      } else {
+        sstates.motor_left = false;
+        Serial.println("Left motor disabled!");
       }
     }
   } else if (event == REVENT) {
@@ -46,6 +53,10 @@ void ir_sensor_event(int event, int intensity, sensor_states &sstates) {
       sstates.ir_right = intensity;
       if (intensity == SENSOR_HIGH) {
         sstates.motor_right = true;
+        Serial.println("Right motor enabled!");
+      } else {
+        sstates.motor_right = false;
+        Serial.println("Right motor disabled!");
       }
     }
   }
@@ -65,11 +76,21 @@ void ir_sensor_poll(sensor_states &sstates) {
 }
 
 void motor(sensor_states &sstates) {
-  if (motor_left) {
-    digitalWrite(L)
+  if (sstates.motor_left) {
+    Serial.println("Left motor go!");
+    digitalWrite(L_MOTOR_IN1, HIGH);
+    digitalWrite(L_MOTOR_IN2, LOW);
+  } else {
+    digitalWrite(L_MOTOR_IN1, LOW);
+    digitalWrite(L_MOTOR_IN2, LOW);
   }
-  if (motor_right) {
-    //
+  if (sstates.motor_right) {
+    Serial.println("Right motor go!");
+    digitalWrite(R_MOTOR_IN1, HIGH);
+    digitalWrite(R_MOTOR_IN2, LOW);
+  } else {
+    digitalWrite(R_MOTOR_IN1, LOW);
+    digitalWrite(R_MOTOR_IN2, LOW);
   }
 }
 
