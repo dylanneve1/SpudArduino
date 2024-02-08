@@ -2,11 +2,11 @@
 #include "SensorManager.h"
 #include "MotorManager.h"
 
-// Sensors class initialization
+// Class initialization
 SensorManager sensors;
 MotorManager motors;
 
-// Data structure of sensor states
+// Data structure of states
 sensor_states sstates;
 motor_states mstates;
 
@@ -14,14 +14,14 @@ motor_states mstates;
 void setup() {
   // Begin serial connection
   Serial.begin(9600);
-  // Setup pins for sensors
+  // Setup pins
   sensors.pinSetup();
   motors.pinSetup();
 }
 
 // Main loop
 void loop() {
-  // Probe sensors passing them states
+  // Probe devices passing them states
   // incase changes have occurred
   sensors.probe(sstates, mstates);
   motors.probe(mstates);

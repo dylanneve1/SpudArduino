@@ -39,10 +39,10 @@ int SensorManager::ir_sensor_event(int event, int intensity, sensor_states &ssta
       Serial.println("sensor_event: left state changed!");
       sstates.ir_left = intensity;
       if (intensity == SENSOR_HIGH) {
-        mstates.left = true;
+        mstates.left = MSTATE_FORWARD;
         Serial.println("Left motor enabled!");
       } else {
-        mstates.left = false;
+        mstates.left = MSTATE_OFF;
         Serial.println("Left motor disabled!");
       }
     }
@@ -51,10 +51,10 @@ int SensorManager::ir_sensor_event(int event, int intensity, sensor_states &ssta
       Serial.println("sensor_event: right state changed!");
       sstates.ir_right = intensity;
       if (intensity == SENSOR_HIGH) {
-        mstates.right = true;
+        mstates.right = MSTATE_FORWARD;
         Serial.println("Right motor enabled!");
       } else {
-        mstates.right = false;
+        mstates.right = MSTATE_OFF;
         Serial.println("Right motor disabled!");
       }
     }
