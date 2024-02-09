@@ -1,6 +1,7 @@
 // Includes
 #include "SensorManager.h"
 #include "MotorManager.h"
+#include "SpudArduino.h"
 
 // Class initialization
 SensorManager sensors;
@@ -9,6 +10,7 @@ MotorManager motors;
 // Data structure of states
 sensor_states sstates;
 motor_states mstates;
+arduino_states astates;
 
 // Setup function
 void setup() {
@@ -25,5 +27,6 @@ void loop() {
   // incase changes have occurred
   sensors.probe(sstates, mstates);
   motors.probe(mstates);
-  delay(1000);
+  astates.time += 1;
+  delay(DELAY_TIME);
 }
