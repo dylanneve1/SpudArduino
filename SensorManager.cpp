@@ -15,12 +15,12 @@ void SensorManager::probe(sensor_states &sstates, motor_states &mstates) {
 }
 
 int SensorManager::ir_sensor_poll(sensor_states &sstates, motor_states &mstates) {
-  if (digitalRead(LEYE) == HIGH) {
+  if (digitalRead(LEYE) != HIGH) {
     ir_sensor_event(LEVENT, SENSOR_LOW, sstates, mstates);
   } else {
     ir_sensor_event(LEVENT, SENSOR_HIGH, sstates, mstates);
   }
-  if (digitalRead(REYE) == HIGH) {
+  if (digitalRead(REYE) != HIGH) {
     ir_sensor_event(REVENT, SENSOR_LOW, sstates, mstates);
   } else {
     ir_sensor_event(REVENT, SENSOR_HIGH, sstates, mstates);
