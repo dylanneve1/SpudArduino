@@ -42,8 +42,8 @@ void MotorManager::probe(motor_states &mstates) {
       mstates.prev_right = MSTATE_FORWARD;
       Serial.println("Right motor change:");
       Serial.println("mstates.right=MSTATE_FORWARD");
-      Serial.print("mstates.right_speed=");
-      Serial.println(mstates.right_speed);
+      //Serial.print("mstates.right_speed=");
+      //Serial.println(mstates.right_speed);
       analogWrite(R_MOTOR_EN, mstates.right_speed);
       if (mstates.right_needs_update) {
         mstates.right_needs_update = false;
@@ -72,10 +72,14 @@ void MotorManager::probe(motor_states &mstates) {
   if (mstates.left_needs_update) {
     analogWrite(L_MOTOR_EN, mstates.left_speed);
     mstates.left_needs_update = false;
+    //Serial.print("mstates.right_speed=");
+    //Serial.println(mstates.right_speed);
   }
   if (mstates.right_needs_update) {
     analogWrite(R_MOTOR_EN, mstates.right_speed);
     mstates.right_needs_update = false;
+    //Serial.print("mstates.right_speed=");
+    //Serial.println(mstates.right_speed);
   }
 }
 

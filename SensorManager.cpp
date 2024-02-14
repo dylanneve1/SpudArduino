@@ -12,31 +12,27 @@ void SensorManager::pinSetup() {
 // polls each sensor and performs any
 // necessary updates to the data structs
 void SensorManager::probe(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance) {
-  int result = ir_sensor_poll(sstates, mstates);
-  if (result == 1) {
-    guidance.createEntry();
-  }
+  int result = ir_sensor_poll(sstates, mstates, guidance);
 }
 
-int SensorManager::ir_sensor_poll(sensor_states &sstates, motor_states &mstates) {
+int SensorManager::ir_sensor_poll(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance) {
   int ret = 0;
   if (digitalRead(LEYE) != HIGH) {
-    ir_sensor_event(LEVENT, SENSOR_LOW, sstates, mstates);
-    ret = 1;
+    ret = ir_sensor_event(LEVENT, SENSOR_LOW, sstates, mstates, guidance);
   } else {
-    ir_sensor_event(LEVENT, SENSOR_HIGH, sstates, mstates);
+    ret = ir_sensor_event(LEVENT, SENSOR_HIGH, sstates, mstates, guidance);
   }
   if (digitalRead(REYE) != HIGH) {
-    ir_sensor_event(REVENT, SENSOR_LOW, sstates, mstates);
-    ret = 1;
+    ret = ir_sensor_event(REVENT, SENSOR_LOW, sstates, mstates, guidance);
   } else {
-    ir_sensor_event(REVENT, SENSOR_HIGH, sstates, mstates);
+    ret = ir_sensor_event(REVENT, SENSOR_HIGH, sstates, mstates, guidance);
   }
   return ret;
 }
 
 // IR Sensor Event
-int SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sstates, motor_states &mstates) {
+int SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance) {
+  int ret = 0;
   // Check if Left or Right IR Sensor
   // If intensity is different from
   // the current sensor states then
@@ -52,6 +48,7 @@ int SensorManager::ir_sensor_event(int event, int intensity, sensor_states &ssta
       } else {
         mstates.left = MSTATE_OFF;
         Serial.println("Left motor disabled!");
+        guidance.createEntry();
       }
     }
   } else if (event == REVENT) {
@@ -64,7 +61,9 @@ int SensorManager::ir_sensor_event(int event, int intensity, sensor_states &ssta
       } else {
         mstates.right = MSTATE_OFF;
         Serial.println("Right motor disabled!");
+        guidance.createEntry();
       }
     }
   }
+  return ret;
 }
