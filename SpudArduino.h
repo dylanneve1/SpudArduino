@@ -5,7 +5,8 @@
 
 // Data structure to store Arduino info
 struct arduino_states {
-  int time = 0;
+  unsigned long start_time;
+  unsigned long current_time;
 };
 
 #endif
