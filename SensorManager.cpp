@@ -1,5 +1,6 @@
 #include "SensorManager.h"
 #include <Serial.h>
+#include "GuidanceManager.h"
 
 // Setup pins for the SensorManager
 void SensorManager::pinSetup() {
@@ -10,21 +11,28 @@ void SensorManager::pinSetup() {
 // Entry point for SensorManager class
 // polls each sensor and performs any
 // necessary updates to the data structs
-void SensorManager::probe(sensor_states &sstates, motor_states &mstates) {
-  ir_sensor_poll(sstates, mstates);
+void SensorManager::probe(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance) {
+  int result = ir_sensor_poll(sstates, mstates);
+  if (result == 1) {
+    guidance.createEntry();
+  }
 }
 
 int SensorManager::ir_sensor_poll(sensor_states &sstates, motor_states &mstates) {
+  int ret = 0;
   if (digitalRead(LEYE) != HIGH) {
     ir_sensor_event(LEVENT, SENSOR_LOW, sstates, mstates);
+    ret = 1;
   } else {
     ir_sensor_event(LEVENT, SENSOR_HIGH, sstates, mstates);
   }
   if (digitalRead(REYE) != HIGH) {
     ir_sensor_event(REVENT, SENSOR_LOW, sstates, mstates);
+    ret = 1;
   } else {
     ir_sensor_event(REVENT, SENSOR_HIGH, sstates, mstates);
   }
+  return ret;
 }
 
 // IR Sensor Event

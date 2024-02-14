@@ -2,6 +2,7 @@
 #define SENSOR_MANAGER_H
 
 #include "MotorManager.h"
+#include "GuidanceManager.h"
 
 // IR sensor events
 #define LEVENT       11
@@ -27,7 +28,7 @@ struct sensor_states {
 class SensorManager {
 
 public:
-  void probe(sensor_states &sstates, motor_states &mstates);
+  void probe(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance);
   void pinSetup();
 
 private:

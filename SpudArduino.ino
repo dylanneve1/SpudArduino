@@ -2,10 +2,12 @@
 #include "SensorManager.h"
 #include "MotorManager.h"
 #include "SpudArduino.h"
+#include "GuidanceManager.h"
 
 // Class initialization
 SensorManager sensors;
 MotorManager motors;
+GuidanceManager guidance;
 
 // Data structure of states
 sensor_states sstates;
@@ -25,11 +27,17 @@ void setup() {
 
 // Main loop
 void loop() {
+  // Refresh the current hits
+  guidance.refresh();
+  Serial.print("Current hits in last ");
+  Serial.print(HIT_TIMEFRAME);
+  Serial.print(" is ");
+  Serial.println(guidance.poll());
   // Set the current time before starting loop
   astates.current_time = millis();
   // Probe devices passing them states
   // incase changes have occurred
-  sensors.probe(sstates, mstates);
+  sensors.probe(sstates, mstates, guidance);
   motors.probe(mstates);
   delay(DELAY_TIME);
 }
