@@ -14,6 +14,8 @@ arduino_states astates;
 
 // Setup function
 void setup() {
+  // Set current time
+  astates.current_time = millis();
   // Begin serial connection
   Serial.begin(9600);
   // Setup pins
@@ -27,6 +29,4 @@ void loop() {
   // incase changes have occurred
   sensors.probe(sstates, mstates);
   motors.probe(mstates);
-  astates.time += 1;
-  delay(DELAY_TIME);
 }
