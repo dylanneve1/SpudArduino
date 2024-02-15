@@ -14,15 +14,22 @@ void GuidanceManager::refresh(motor_states &mstates) {
   for (int i = 0; i < current_len; i++) {
     unsigned long timediff = millis() - hits[i];
     if (timediff >= HIT_TIMEFRAME) {
+      Serial.println("Hit removed");
       current_len--;
       return;
     }
   }
-  int newspeed = 215 - poll()*10;
-  mstates.left_speed = newspeed;
-  mstates.right_speed = newspeed;
-  mstates.right_needs_update = true;
-  mstates.left_needs_update = true;
+  if (poll() > 0) {
+    int newspeed = 215 - poll()*5;
+    if (mstates.left_speed != newspeed) {
+      mstates.left_speed = newspeed;
+      mstates.left_needs_update = true;
+    }
+    if (mstates.right_speed != newspeed) {
+      mstates.right_speed = newspeed;
+      mstates.right_needs_update = true;
+    }
+  }
 }
 
 int GuidanceManager::poll() {

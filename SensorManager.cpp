@@ -12,27 +12,24 @@ void SensorManager::pinSetup() {
 // polls each sensor and performs any
 // necessary updates to the data structs
 void SensorManager::probe(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance) {
-  int result = ir_sensor_poll(sstates, mstates, guidance);
+  ir_sensor_poll(sstates, mstates, guidance);
 }
 
-int SensorManager::ir_sensor_poll(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance) {
-  int ret = 0;
+void SensorManager::ir_sensor_poll(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance) {
   if (digitalRead(LEYE) != HIGH) {
-    ret = ir_sensor_event(LEVENT, SENSOR_LOW, sstates, mstates, guidance);
+    ir_sensor_event(LEVENT, SENSOR_LOW, sstates, mstates, guidance);
   } else {
-    ret = ir_sensor_event(LEVENT, SENSOR_HIGH, sstates, mstates, guidance);
+    ir_sensor_event(LEVENT, SENSOR_HIGH, sstates, mstates, guidance);
   }
   if (digitalRead(REYE) != HIGH) {
-    ret = ir_sensor_event(REVENT, SENSOR_LOW, sstates, mstates, guidance);
+    ir_sensor_event(REVENT, SENSOR_LOW, sstates, mstates, guidance);
   } else {
-    ret = ir_sensor_event(REVENT, SENSOR_HIGH, sstates, mstates, guidance);
+    ir_sensor_event(REVENT, SENSOR_HIGH, sstates, mstates, guidance);
   }
-  return ret;
 }
 
 // IR Sensor Event
-int SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance) {
-  int ret = 0;
+void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance) {
   // Check if Left or Right IR Sensor
   // If intensity is different from
   // the current sensor states then
@@ -65,5 +62,4 @@ int SensorManager::ir_sensor_event(int event, int intensity, sensor_states &ssta
       }
     }
   }
-  return ret;
 }

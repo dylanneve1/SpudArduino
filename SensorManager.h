@@ -32,8 +32,8 @@ public:
   void pinSetup();
 
 private:
-  int ir_sensor_poll(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance);
-  int ir_sensor_event(int event, int intensity, sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance);
+  void ir_sensor_poll(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance);
+  void ir_sensor_event(int event, int intensity, sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance);
   
 };
 
