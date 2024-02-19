@@ -6,6 +6,8 @@
 void SensorManager::pinSetup() {
   pinMode(LEYE, INPUT);
   pinMode(REYE, INPUT);
+  pinMode(US_TRIG, OUTPUT);
+  pinMode(US_ECHO, INPUT);
 }
 
 // Entry point for SensorManager class
