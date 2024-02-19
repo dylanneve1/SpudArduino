@@ -16,6 +16,11 @@
 #define LEYE          4 
 #define REYE         13
 
+//define ultrasonic pins
+
+#define US_TRIG      8
+#define US_ECHO      9
+
 // Data structure to store IR sensor
 // states between loops, we will default
 // to LOW state
@@ -30,6 +35,8 @@ class SensorManager {
 public:
   void probe(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance);
   void pinSetup();
+  
+
 
 private:
   void ir_sensor_poll(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance);
