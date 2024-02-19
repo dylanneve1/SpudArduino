@@ -3,11 +3,13 @@
 #include "MotorManager.h"
 #include "SpudArduino.h"
 #include "GuidanceManager.h"
+#include "WiFiManager.h"
 
 // Class initialization
 SensorManager sensors;
 MotorManager motors;
 GuidanceManager guidance;
+WiFiManager wifi;
 
 // Data structure of states
 sensor_states sstates;
@@ -24,10 +26,16 @@ void setup() {
   // Setup pins
   sensors.pinSetup();
   motors.pinSetup();
+  // Wireless Setup
+  wifi.setupAP();
+  wifi.setupServer();
 }
 
 // Main loop
 void loop() {
+  String message = "Hello from Arduino...";
+  // Send test message
+  wifi.messageClient(message);
   // Refresh the current hits
   guidance.refresh(mstates);
   // Serial.print("Current hits in last ");
