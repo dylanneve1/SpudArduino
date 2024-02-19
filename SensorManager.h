@@ -35,12 +35,12 @@ class SensorManager {
 public:
   void probe(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance);
   void pinSetup();
-  
-
+  void ultrasonic_poll(motor_states &mstates, sensor_states &sstates);
 
 private:
   void ir_sensor_poll(sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance);
   void ir_sensor_event(int event, int intensity, sensor_states &sstates, motor_states &mstates, GuidanceManager &guidance);
+  int getUltrasonicDistance();
   
 };
 

@@ -1,6 +1,7 @@
 #include "SensorManager.h"
 #include <Serial.h>
 #include "GuidanceManager.h"
+#include "MotorManager.h"
 
 // Setup pins for the SensorManager
 void SensorManager::pinSetup() {
@@ -64,4 +65,39 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
       }
     }
   }
+}
+
+void SensorManager::ultrasonic_poll(motor_states &mstates, sensor_states &sstates) {
+  // Probe devices passing them states
+  // incase changes have occurred
+   // Check distance with ultrasonic sensor
+  int distance = getUltrasonicDistance();
+
+  Serial.print("Distance detected: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  if (distance < 20.0) {
+    Serial.println("YOU NEED TO STOP!");
+    mstates.left = MSTATE_OFF;
+    mstates.right = MSTATE_OFF;
+    return;
+  }
+  if (sstates.ir_left == SENSOR_HIGH && mstates.left == MSTATE_OFF) {
+    mstates.left = MSTATE_FORWARD;
+  }
+  if (sstates.ir_right == SENSOR_HIGH && mstates.right == MSTATE_OFF) {
+    mstates.right = MSTATE_FORWARD;
+  }
+}
+
+// Function to get ultrasonic distance
+int SensorManager::getUltrasonicDistance() {
+  digitalWrite(US_TRIG, LOW);
+  delayMicroseconds(2);
+  digitalWrite(US_TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(US_TRIG, LOW);
+  long duration = pulseIn(US_ECHO, HIGH);
+  return duration / 58;
 }

@@ -29,9 +29,9 @@ struct motor_states {
   int right = MSTATE_OFF;
   int prev_left = MSTATE_OFF;
   int prev_right = MSTATE_OFF;
-  int left_speed = 215;
+  int left_speed = 210;
   int left_needs_update = false;
-  int right_speed = 215;
+  int right_speed = 210;
   int right_needs_update = false;
 };
 
