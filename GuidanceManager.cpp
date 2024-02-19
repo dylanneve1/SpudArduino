@@ -21,6 +21,9 @@ void GuidanceManager::refresh(motor_states &mstates) {
   }
   if (poll() > 0) {
     int newspeed = 215 - poll()*5;
+    if (newspeed <= 200) {
+      return;
+    }
     if (mstates.left_speed != newspeed) {
       mstates.left_speed = newspeed;
       mstates.left_needs_update = true;
