@@ -10,6 +10,7 @@ class GuidanceManager {
 private:
   int current_len = 0;
   unsigned long hits[100];
+  void reorderList();
 public:
   void refresh(motor_states &mstates);
   void createEntry();

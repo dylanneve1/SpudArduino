@@ -9,6 +9,7 @@ struct arduino_states {
   unsigned long start_time;
   unsigned long current_time;
   unsigned long last_update_time;
+  unsigned long last_server_time;
 };
 
 #endif

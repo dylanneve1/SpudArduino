@@ -73,11 +73,10 @@ void SensorManager::ultrasonic_poll(motor_states &mstates, sensor_states &sstate
    // Check distance with ultrasonic sensor
   int distance = getUltrasonicDistance();
 
-  Serial.print("Distance detected: ");
-  Serial.print(distance);
-  Serial.println(" cm");
-
   if (distance < 20.0) {
+    Serial.print("Distance detected: ");
+    Serial.print(distance);
+    Serial.println(" cm");
     Serial.println("YOU NEED TO STOP!");
     mstates.left = MSTATE_OFF;
     mstates.right = MSTATE_OFF;

@@ -25,7 +25,6 @@ void WiFiManager::messageClient(String message) {
   const char* message_formatted = message.c_str();
   if (client.connected()) { 
     client.write(message_formatted);
-    Serial.println(message_formatted);
-    client.stop();
+    client.write("\n");
   } 
 }

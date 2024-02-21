@@ -8,6 +8,7 @@ void GuidanceManager::createEntry() {
   }
   hits[current_len] = millis();
   current_len++;
+  reorderList();
 }
 
 void GuidanceManager::refresh(motor_states &mstates) {
@@ -20,8 +21,8 @@ void GuidanceManager::refresh(motor_states &mstates) {
     }
   }
   if (poll() > 0) {
-    int newspeed = 215 - poll()*5;
-    if (newspeed <= 200) {
+    int newspeed = 210 - poll()*5;
+    if (newspeed < 200) {
       return;
     }
     if (mstates.left_speed != newspeed) {
@@ -30,6 +31,15 @@ void GuidanceManager::refresh(motor_states &mstates) {
     }
     if (mstates.right_speed != newspeed) {
       mstates.right_speed = newspeed;
+      mstates.right_needs_update = true;
+    }
+  } else {
+    if (mstates.left_speed != 210) {
+      mstates.left_speed = 210;
+      mstates.left_needs_update = true;
+    }
+    if (mstates.right_speed != 210) {
+      mstates.right_speed = 210;
       mstates.right_needs_update = true;
     }
   }
@@ -45,3 +55,27 @@ int GuidanceManager::poll() {
   }
   return ret;
 }
+
+void GuidanceManager::reorderList() {
+  if (current_len <= 1) { 
+      return; 
+  }
+
+  bool unsorted = true;
+
+  while (unsorted) {
+    int x = 0;
+    for (int i = 0; i < current_len - 1; i++) {
+      if (hits[i] < hits[i+1]) {
+        x++;
+        unsigned long tmp = hits[i];
+        hits[i] = hits[i+1];
+        hits[i+1] = tmp;
+      }
+    }
+    if (x <= 0) {
+      unsorted = false;
+    }
+  }
+}
+
