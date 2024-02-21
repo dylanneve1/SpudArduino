@@ -13,7 +13,7 @@ void WiFiManager::setupAP() {
 
   Serial.print("IP Address: ");
   Serial.println(ip);
-  delay(10000);
+  //delay(10000);
 }
 
 void WiFiManager::setupServer() {
