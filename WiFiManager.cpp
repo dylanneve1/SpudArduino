@@ -2,9 +2,7 @@
 
 #include "SpudArduino.h"
 #include "WiFiManager.h"
-#include "SensorManager.h"
 
-SensorManager sensorwifi;
 
 WiFiManager::WiFiManager()
   : server(5200), client(), startStopCommand(false) {
@@ -52,6 +50,6 @@ int WiFiManager::startStopCommandReceived() {
   if (lastOne) {
     return 1;
   } else {
-    return 3;
+    return 0;
   }
 }

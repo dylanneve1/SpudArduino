@@ -2,7 +2,6 @@
 #include <Serial.h>
 #include "WiFiManager.h"
 
-WiFiManager wifiread;
 
 // Setup pins for the SensorManager
 void SensorManager::pinSetup() {
@@ -16,6 +15,8 @@ void SensorManager::pinSetup() {
   pinMode(L_MOTOR_IN2, OUTPUT);
   pinMode(R_MOTOR_IN1, OUTPUT);
   pinMode(R_MOTOR_IN2, OUTPUT);
+  pinMode(L_MOTOR_ENC, INPUT);
+  pinMode(R_MOTOR_ENC, INPUT);
 }
 
 // Entry point for SensorManager class

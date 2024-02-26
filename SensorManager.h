@@ -18,6 +18,9 @@
 #define US_TRIG 8
 #define US_ECHO 9
 
+#define R_MOTOR_ENC 2
+#define L_MOTOR_ENC 3
+
 #define R_MOTOR_IN1 6
 #define R_MOTOR_IN2 5
 #define L_MOTOR_IN1 11

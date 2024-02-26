@@ -17,6 +17,10 @@ bool motorsEnabled = false;
 // Check if US has been polled
 bool firstPoll = true;
 
+bool R_ENC = true;
+
+int dist = 0;
+
 int work = 0;
 
 // Setup function
@@ -36,12 +40,21 @@ void setup() {
 
 // Main loop
 void loop() {
+
+  if (digitalRead(L_MOTOR_ENC) == HIGH && R_ENC) {
+    dist++;
+    R_ENC = false;
+  }
+  if (digitalRead(L_MOTOR_ENC) == LOW && !R_ENC) {
+    R_ENC = true;
+  }
+
   work = wifi.startStopCommandReceived();
   if (work != 1) {
     sensors.changeMotor(2);
     sensors.changeMotor(3);
   }
-  // Refresh the current hits
+  
   // Set the current time before starting loop
   astates.current_time = millis();
   // Sensors
@@ -49,6 +62,7 @@ void loop() {
   if (millis() - astates.last_update_time >= 500 || firstPoll) {
     sensors.ultrasonic_poll(work, sstates);
     astates.last_update_time = millis();
+    Serial.println(dist);
   }
   if (firstPoll) {
     firstPoll = false;
