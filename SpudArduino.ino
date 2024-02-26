@@ -1,20 +1,18 @@
 // Includes
 #include "SensorManager.h"
-#include "MotorManager.h"
 #include "SpudArduino.h"
-#include "GuidanceManager.h"
 #include "WiFiManager.h"
 
 // Class initialization
 SensorManager sensors;
-MotorManager motors;
-GuidanceManager guidance;
 WiFiManager wifi;
 
 // Data structure of states
 sensor_states sstates;
-motor_states mstates;
 arduino_states astates;
+
+// Flag to control the motors
+bool motorsEnabled = false;
 
 // Check if US has been polled
 bool firstPoll = true;
@@ -29,7 +27,6 @@ void setup() {
   Serial.begin(9600);
   // Setup pins
   sensors.pinSetup();
-  motors.pinSetup();
   // Wireless Setup
   wifi.setupAP();
   wifi.setupServer();
@@ -38,35 +35,33 @@ void setup() {
 // Main loop
 void loop() {
   // Refresh the current hits
-  guidance.refresh(mstates);
-  // Serial.print("Current hits in last ");
-  // Serial.print(HIT_TIMEFRAME);
-  // Serial.print(" is ");
-  // Serial.println(guidance.poll());
   // Set the current time before starting loop
   astates.current_time = millis();
   // Sensors
-  sensors.probe(sstates, mstates, guidance);
-  motors.probe(mstates);
-  if (millis() - astates.last_update_time >= 100 || firstPoll) {
-    sensors.ultrasonic_poll(mstates, sstates);
+  sensors.probe(sstates);
+  if (millis() - astates.last_update_time >= 500 || firstPoll) {
+    int work= wifi.startStopCommandReceived();
+    //sensors.wifi_poll(work,sstates);
+    sensors.ultrasonic_poll(sstates);
     astates.last_update_time = millis();
     if (firstPoll) {
       firstPoll = false;
       Serial.println("Sneaky first poll completed!");
     }
   }
-  if (millis() - astates.last_server_time >= 1000) {
+  if (millis() - astates.last_server_time >= 2000) {
+    // Print current information
     printCurrentInfo();
+    // Check for start/stop command from Processing
     astates.last_server_time = millis();
   }
 }
 
 void printCurrentInfo() {
   String data = "L:";
-  data += String(mstates.left_speed);
+  data += 100;
   data += ",R:";
-  data += String(mstates.right_speed);
+  data += 100;
   data += ",D:";
   data += String(sensors.getUltrasonicDistance());
   wifi.messageClient(data);

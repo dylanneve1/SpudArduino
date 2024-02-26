@@ -1,19 +1,24 @@
-#include <WiFiS3.h>
-#include "WiFiManager.h"
+// WiFiManager.cpp
 
-WiFiServer server(5200);
+#include "SpudArduino.h"
+#include "WiFiManager.h"
+#include "SensorManager.h"
+
+SensorManager sensorwifi;
+
+WiFiManager::WiFiManager() : server(5200), client(), startStopCommand(false) {
+}
 
 void WiFiManager::setupAP() {
   char ssid[] = "SpudArduino";
   char pass[] = "Arduino2024";
-  
+
   WiFi.beginAP(ssid, pass);
 
   IPAddress ip = WiFi.localIP();
 
   Serial.print("IP Address: ");
   Serial.println(ip);
-  delay(10000);
 }
 
 void WiFiManager::setupServer() {
@@ -21,10 +26,28 @@ void WiFiManager::setupServer() {
 }
 
 void WiFiManager::messageClient(String message) {
-  WiFiClient client = server.available();
+  client = server.available();
   const char* message_formatted = message.c_str();
-  if (client.connected()) { 
+  if (client.connected()) {
     client.write(message_formatted);
     client.write("\n");
-  } 
+  }
 }
+
+int WiFiManager::startStopCommandReceived() {
+  if (client.available()) {
+    String command = client.readStringUntil('\n');
+    Serial.println(command);
+  if (command == "1") {
+    Serial.println("It should start");
+    return 1;
+  }
+  else if (command=="0")
+  { Serial.println("It should stop.");
+    return 0;
+  }
+}
+    }
+
+
+  

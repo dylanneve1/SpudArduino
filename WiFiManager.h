@@ -1,12 +1,23 @@
-#ifndef WIFI_MANAGER_H
-#define WIFI_MANAGER_H
+// WiFiManager.h
 
-// WiFIManager class
+#ifndef WiFiManager_h
+#define WiFiManager_h
+
+#include "Arduino.h"
+#include <WiFiS3.h>
+#include "SensorManager.h"
+
 class WiFiManager {
-  public:
-    void setupAP();
-    void setupServer();
-    void messageClient(String message);
+public:
+  WiFiManager();  // Constructor
+  void setupAP();
+  void setupServer();
+  void messageClient(String message);
+  int startStopCommandReceived();
+private:
+  WiFiServer server;
+  WiFiClient client;
+  bool startStopCommand;
 };
 
 #endif
