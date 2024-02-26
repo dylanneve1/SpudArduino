@@ -21,8 +21,10 @@ void SensorManager::pinSetup() {
 // Entry point for SensorManager class
 // polls each sensor and performs any
 // necessary updates to the data structs
-void SensorManager::probe(sensor_states &sstates) {
-  ir_sensor_poll(sstates);
+void SensorManager::probe(int work, sensor_states &sstates) {
+  if (work ==   1) {
+    ir_sensor_poll(sstates);
+  }
 }
 
 void SensorManager::ir_sensor_poll(sensor_states &sstates) {
@@ -40,6 +42,9 @@ void SensorManager::ir_sensor_poll(sensor_states &sstates) {
 
 // IR Sensor Event
 void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sstates) {
+  //if (!working) {
+  //return;
+  // }
   // Check if Left or Right IR Sensor
   // If intensity is different from
   // the current sensor states then
@@ -92,26 +97,31 @@ void SensorManager::changeMotor(int motor) {
   }
 }
 
-void SensorManager::ultrasonic_poll(sensor_states &sstates) {
+void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
+  // if (!working) {
+  //   return;
+  // }
   // Probe devices passing them states
   // incase changes have occurred
-   // Check distance with ultrasonic sensor
-  int distance = getUltrasonicDistance();
+  // Check distance with ultrasonic sensor
+  if (work == 1) {
+    int distance = getUltrasonicDistance();
 
-  if (distance < 10.0) {
-    Serial.print("Distance detected: ");
-    Serial.print(distance);
-    Serial.println(" cm");
-    Serial.println("YOU NEED TO STOP!");
-    changeMotor(2);
-    changeMotor(3);
-    return;
-  }
-  if (sstates.ir_left == SENSOR_HIGH) {
-    changeMotor(0);
-  }
-  if (sstates.ir_right == SENSOR_HIGH) {
-    changeMotor(1);
+    if (distance < 10.0) {
+      Serial.print("Distance detected: ");
+      Serial.print(distance);
+      Serial.println(" cm");
+      Serial.println("YOU NEED TO STOP!");
+      changeMotor(2);
+      changeMotor(3);
+      return;
+    }
+    if (sstates.ir_left == SENSOR_HIGH) {
+      changeMotor(0);
+    }
+    if (sstates.ir_right == SENSOR_HIGH) {
+      changeMotor(1);
+    }
   }
 }
 

@@ -41,9 +41,9 @@ struct sensor_states {
 class SensorManager {
 
 public:
-  void probe(sensor_states &sstates);
-  void pinSetup();
-  void ultrasonic_poll(sensor_states &sstates);
+  void probe(int work, sensor_states &sstates);
+  void pinSetup(); 
+  void ultrasonic_poll(int work, sensor_states &sstates);
   int getUltrasonicDistance();
   void changeMotor(int motor);
   void wifi_poll(int work,sensor_states &sstates);

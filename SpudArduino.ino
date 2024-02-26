@@ -17,6 +17,8 @@ bool motorsEnabled = false;
 // Check if US has been polled
 bool firstPoll = true;
 
+int work = 0;
+
 // Setup function
 void setup() {
   // Set to start millis
@@ -34,20 +36,21 @@ void setup() {
 
 // Main loop
 void loop() {
+  work = wifi.startStopCommandReceived();
   // Refresh the current hits
   // Set the current time before starting loop
   astates.current_time = millis();
   // Sensors
-  sensors.probe(sstates);
+  sensors.probe(work, sstates);
   if (millis() - astates.last_update_time >= 500 || firstPoll) {
-    int work= wifi.startStopCommandReceived();
-    //sensors.wifi_poll(work,sstates);
-    sensors.ultrasonic_poll(sstates);
-    astates.last_update_time = millis();
-    if (firstPoll) {
-      firstPoll = false;
-      Serial.println("Sneaky first poll completed!");
-    }
+    Serial.println(work);
+    sensors.wifi_poll(work, sstates);
+  }
+  sensors.ultrasonic_poll(work, sstates);
+  astates.last_update_time = millis();
+  if (firstPoll) {
+    firstPoll = false;
+    Serial.println("Sneaky first poll completed!");
   }
   if (millis() - astates.last_server_time >= 2000) {
     // Print current information

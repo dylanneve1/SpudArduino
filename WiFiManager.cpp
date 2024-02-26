@@ -37,17 +37,17 @@ void WiFiManager::messageClient(String message) {
 int WiFiManager::startStopCommandReceived() {
   if (client.available()) {
     String command = client.readStringUntil('\n');
-    Serial.println(command);
-  if (command == "1") {
-    Serial.println("It should start");
-    return 1;
-  }
-  else if (command=="0")
-  { Serial.println("It should stop.");
-    return 0;
-  }
-}
+
+    if (command == "1") {
+      Serial.println("It should start");
+      return 1;
+    } else if (command=="0") { 
+      Serial.println("It should stop.");
+      return 0;
     }
+  }
+  return 3;
+}
 
 
   
