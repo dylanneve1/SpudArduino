@@ -40,13 +40,19 @@ int WiFiManager::startStopCommandReceived() {
 
     if (command == "1") {
       Serial.println("It should start");
+      lastOne = true;
       return 1;
     } else if (command=="0") { 
       Serial.println("It should stop.");
+      lastOne = false;
       return 0;
     }
   }
-  return 3;
+  if (lastOne) {
+    return 1;
+  } else {
+    return 3;
+  }
 }
 
 

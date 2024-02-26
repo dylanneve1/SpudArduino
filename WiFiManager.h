@@ -18,6 +18,7 @@ private:
   WiFiServer server;
   WiFiClient client;
   bool startStopCommand;
+  bool lastOne = false;
 };
 
 #endif

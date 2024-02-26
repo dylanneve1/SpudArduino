@@ -22,7 +22,7 @@ void SensorManager::pinSetup() {
 // polls each sensor and performs any
 // necessary updates to the data structs
 void SensorManager::probe(int work, sensor_states &sstates) {
-  if (work ==   1) {
+  if (work == 1) {
     ir_sensor_poll(sstates);
   }
 }
@@ -119,21 +119,6 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
     if (sstates.ir_left == SENSOR_HIGH) {
       changeMotor(0);
     }
-    if (sstates.ir_right == SENSOR_HIGH) {
-      changeMotor(1);
-    }
-  }
-}
-
-void SensorManager::wifi_poll(int work, sensor_states &sstates) {
-  if (work == 0) {
-    changeMotor(2);
-    changeMotor(3);
-  } else {
-    if (sstates.ir_left == SENSOR_HIGH) {
-      changeMotor(0);
-    }
-
     if (sstates.ir_right == SENSOR_HIGH) {
       changeMotor(1);
     }

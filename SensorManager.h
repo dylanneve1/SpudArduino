@@ -45,9 +45,7 @@ public:
   void pinSetup(); 
   void ultrasonic_poll(int work, sensor_states &sstates);
   int getUltrasonicDistance();
-  void changeMotor(int motor);
-  void wifi_poll(int work,sensor_states &sstates);
-  
+  void changeMotor(int motor);  
 
 private:
   void ir_sensor_poll(sensor_states &sstates);

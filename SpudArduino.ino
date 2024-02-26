@@ -37,17 +37,19 @@ void setup() {
 // Main loop
 void loop() {
   work = wifi.startStopCommandReceived();
+  if (work != 1) {
+    sensors.changeMotor(2);
+    sensors.changeMotor(3);
+  }
   // Refresh the current hits
   // Set the current time before starting loop
   astates.current_time = millis();
   // Sensors
   sensors.probe(work, sstates);
   if (millis() - astates.last_update_time >= 500 || firstPoll) {
-    Serial.println(work);
-    sensors.wifi_poll(work, sstates);
+    sensors.ultrasonic_poll(work, sstates);
+    astates.last_update_time = millis();
   }
-  sensors.ultrasonic_poll(work, sstates);
-  astates.last_update_time = millis();
   if (firstPoll) {
     firstPoll = false;
     Serial.println("Sneaky first poll completed!");
