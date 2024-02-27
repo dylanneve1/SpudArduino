@@ -1,6 +1,7 @@
 #include "SensorManager.h"
 #include <Serial.h>
 #include "WiFiManager.h"
+#include "SpudArduino.h"
 
 
 // Setup pins for the SensorManager
@@ -23,7 +24,7 @@ void SensorManager::pinSetup() {
 // polls each sensor and performs any
 // necessary updates to the data structs
 void SensorManager::probe(int work, sensor_states &sstates) {
-  if (work == 1) {
+  if (work == BUGGY_WORK) {
     ir_sensor_poll(sstates);
   }
 }
@@ -43,9 +44,6 @@ void SensorManager::ir_sensor_poll(sensor_states &sstates) {
 
 // IR Sensor Event
 void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sstates) {
-  //if (!working) {
-  //return;
-  // }
   // Check if Left or Right IR Sensor
   // If intensity is different from
   // the current sensor states then
@@ -56,10 +54,10 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
       Serial.println("sensor_event: left state changed!");
       sstates.ir_left = intensity;
       if (intensity == SENSOR_HIGH) {
-        changeMotor(0);
+        changeMotor(LEFT_MOTOR_ENABLE);
         Serial.println("Left motor enabled!");
       } else {
-        changeMotor(2);
+        changeMotor(LEFT_MOTOR_DISABLE);
         Serial.println("Left motor disabled!");
       }
     }
@@ -68,30 +66,33 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
       Serial.println("sensor_event: right state changed!");
       sstates.ir_right = intensity;
       if (intensity == SENSOR_HIGH) {
-        changeMotor(1);
+        changeMotor(RIGHT_MOTOR_ENABLE);
         Serial.println("Right motor enabled!");
       } else {
-        changeMotor(3);
+        changeMotor(RIGHT_MOTOR_DISABLE);
         Serial.println("Right motor disabled!");
       }
     }
   }
 }
 
+// Function to change motor states
+// between on and off for the left
+// and right motors
 void SensorManager::changeMotor(int motor) {
-  if (motor == 0) {
+  if (motor == LEFT_MOTOR_ENABLE) {
     analogWrite(L_MOTOR_EN, 210);
     digitalWrite(L_MOTOR_IN1, HIGH);
     digitalWrite(L_MOTOR_IN2, LOW);
-  } else if (motor == 1) {
+  } else if (motor == RIGHT_MOTOR_ENABLE) {
     analogWrite(R_MOTOR_EN, 210);
     digitalWrite(R_MOTOR_IN1, HIGH);
     digitalWrite(R_MOTOR_IN2, LOW);
-  } else if (motor == 2) {
+  } else if (motor == LEFT_MOTOR_DISABLE) {
     analogWrite(L_MOTOR_EN, 0);
     digitalWrite(L_MOTOR_IN1, LOW);
     digitalWrite(L_MOTOR_IN2, LOW);
-  } else if (motor == 3) {
+  } else if (motor == RIGHT_MOTOR_DISABLE) {
     analogWrite(R_MOTOR_EN, 0);
     digitalWrite(R_MOTOR_IN1, LOW);
     digitalWrite(R_MOTOR_IN2, LOW);
@@ -99,13 +100,10 @@ void SensorManager::changeMotor(int motor) {
 }
 
 void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
-  // if (!working) {
-  //   return;
-  // }
   // Probe devices passing them states
   // incase changes have occurred
   // Check distance with ultrasonic sensor
-  if (work == 1) {
+  if (work == BUGGY_WORK) {
     int distance = getUltrasonicDistance();
 
     if (distance < 10.0) {
@@ -113,15 +111,15 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
       Serial.print(distance);
       Serial.println(" cm");
       Serial.println("YOU NEED TO STOP!");
-      changeMotor(2);
-      changeMotor(3);
+      changeMotor(LEFT_MOTOR_DISABLE);
+      changeMotor(RIGHT_MOTOR_DISABLE);
       return;
     }
     if (sstates.ir_left == SENSOR_HIGH) {
-      changeMotor(0);
+      changeMotor(LEFT_MOTOR_ENABLE);
     }
     if (sstates.ir_right == SENSOR_HIGH) {
-      changeMotor(1);
+      changeMotor(RIGHT_MOTOR_ENABLE);
     }
   }
 }

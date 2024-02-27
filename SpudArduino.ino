@@ -19,13 +19,19 @@ bool firstPoll = true;
 
 bool R_ENC = true;
 
+// Distance travelled by buggy
 int dist = 0;
 
-int work = 0;
+// Current state of buggy
+// work == BUGGY_IDLE means off
+// work == BUGGY_WORK means on
+int work = BUGGY_IDLE;
 
 // Setup function
 void setup() {
-  // Set to start millis
+  // Set start time, last update time
+  // and last server communication time
+  // to the current millis()
   astates.start_time = millis();
   astates.last_update_time = millis();
   astates.last_server_time = millis();
@@ -34,6 +40,8 @@ void setup() {
   // Setup pins
   sensors.pinSetup();
   // Wireless Setup
+  // - Setup access point
+  // - Connect server
   wifi.setupAP();
   wifi.setupServer();
 }
@@ -49,8 +57,14 @@ void loop() {
     R_ENC = true;
   }
 
+  // Check whether buggy has recieved
+  // start or stop command and if it
+  // has recieved the stop command then
+  // disable the motors, we don't need
+  // to re-enable them because the SensorManager
+  // will audiomatically do that
   work = wifi.startStopCommandReceived();
-  if (work != 1) {
+  if (work != BUGGY_WORK) {
     sensors.changeMotor(2);
     sensors.changeMotor(3);
   }

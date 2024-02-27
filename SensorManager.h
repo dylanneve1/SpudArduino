@@ -1,6 +1,12 @@
 #ifndef SENSOR_MANAGER_H
 #define SENSOR_MANAGER_H
 
+// Right and left motor macros
+#define LEFT_MOTOR_ENABLE   0
+#define RIGHT_MOTOR_ENABLE  1
+#define LEFT_MOTOR_DISABLE  2
+#define RIGHT_MOTOR_DISABLE 3
+
 // IR sensor events
 #define LEVENT 11
 #define REVENT 12

@@ -1,6 +1,9 @@
 #ifndef SPUD_ARDUINO_H
 #define SPUD_ARDUINO_H
 
+#define BUGGY_WORK 1
+#define BUGGY_IDLE 0
+
 #define DELAY_TIME 10
 #define UPDATE_INTERVAL 100  // Set the desired update interval in milliseconds
 
