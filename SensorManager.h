@@ -19,14 +19,18 @@
 #define LEYE 4
 #define REYE 13
 
-//define ultrasonic pins
-
+// Ultrasonic pins
 #define US_TRIG 8
 #define US_ECHO 9
 
+// How often to poll ultrasonic
+#define US_POLL_TIMEFRAME 500
+
+// Left and right motor encoder
 #define R_MOTOR_ENC 2
 #define L_MOTOR_ENC 3
 
+// Left and right motor pins
 #define R_MOTOR_IN1 6
 #define R_MOTOR_IN2 5
 #define L_MOTOR_IN1 11

@@ -73,7 +73,7 @@ void loop() {
   astates.current_time = millis();
   // Sensors
   sensors.probe(work, sstates);
-  if (millis() - astates.last_update_time >= 500 || firstPoll) {
+  if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || firstPoll) {
     sensors.ultrasonic_poll(work, sstates);
     astates.last_update_time = millis();
     Serial.println(dist);
@@ -82,7 +82,7 @@ void loop() {
     firstPoll = false;
     Serial.println("Sneaky first poll completed!");
   }
-  if (millis() - astates.last_server_time >= 2000) {
+  if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
     // Print current information
     printCurrentInfo();
     // Check for start/stop command from Processing

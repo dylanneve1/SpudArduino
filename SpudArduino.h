@@ -1,11 +1,12 @@
 #ifndef SPUD_ARDUINO_H
 #define SPUD_ARDUINO_H
 
+// Server poll frequency
+#define SERVER_POLL_TIMEFRAME 2000
+
+// Buggy work states
 #define BUGGY_WORK 1
 #define BUGGY_IDLE 0
-
-#define DELAY_TIME 10
-#define UPDATE_INTERVAL 100  // Set the desired update interval in milliseconds
 
 // Data structure to store Arduino info
 struct arduino_states {
