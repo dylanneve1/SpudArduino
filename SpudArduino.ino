@@ -17,15 +17,16 @@ bool motorsEnabled = false;
 // Check if US has been polled
 bool firstPoll = true;
 
-bool R_ENC = true;
-
 // Distance travelled by buggy
-int dist = 0;
+double dist = 0;
 
 // Current state of buggy
 // work == BUGGY_IDLE means off
 // work == BUGGY_WORK means on
 int work = BUGGY_IDLE;
+
+// Encoder revolution count
+volatile int revolutions = 0;
 
 // Setup function
 void setup() {
@@ -44,19 +45,14 @@ void setup() {
   // - Connect server
   wifi.setupAP();
   wifi.setupServer();
+  // Setup interrupts for encoders
+  attachInterrupt(digitalPinToInterrupt(L_MOTOR_ENC), encoderISR, RISING); 
+  attachInterrupt(digitalPinToInterrupt(R_MOTOR_ENC), encoderISR, RISING); 
 }
 
 // Main loop
 void loop() {
-
-  if (digitalRead(L_MOTOR_ENC) == HIGH && R_ENC) {
-    dist++;
-    R_ENC = false;
-  }
-  if (digitalRead(L_MOTOR_ENC) == LOW && !R_ENC) {
-    R_ENC = true;
-  }
-
+  dist = sensors.checkWheelEnc(revolutions);
   // Check whether buggy has recieved
   // start or stop command and if it
   // has recieved the stop command then
@@ -76,18 +72,25 @@ void loop() {
   if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || firstPoll) {
     sensors.ultrasonic_poll(work, sstates);
     astates.last_update_time = millis();
-    Serial.println(dist);
   }
   if (firstPoll) {
     firstPoll = false;
     Serial.println("Sneaky first poll completed!");
   }
   if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
+    Serial.print("Current distance travelled: ");
+    Serial.println(dist);
+    Serial.print("Number of revolutions: ");
+    Serial.println(revolutions);
     // Print current information
     printCurrentInfo();
     // Check for start/stop command from Processing
     astates.last_server_time = millis();
   }
+}
+
+void encoderISR() {
+  revolutions++;
 }
 
 void printCurrentInfo() {

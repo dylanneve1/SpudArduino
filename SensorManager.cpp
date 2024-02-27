@@ -16,8 +16,8 @@ void SensorManager::pinSetup() {
   pinMode(L_MOTOR_IN2, OUTPUT);
   pinMode(R_MOTOR_IN1, OUTPUT);
   pinMode(R_MOTOR_IN2, OUTPUT);
-  pinMode(L_MOTOR_ENC, INPUT);
-  pinMode(R_MOTOR_ENC, INPUT);
+  pinMode(L_MOTOR_ENC, INPUT_PULLUP);
+  pinMode(R_MOTOR_ENC, INPUT_PULLUP);
 }
 
 // Entry point for SensorManager class
@@ -134,4 +134,10 @@ int SensorManager::getUltrasonicDistance() {
   digitalWrite(US_TRIG, LOW);
   long duration = pulseIn(US_ECHO, HIGH);
   return duration / 58;
+}
+
+double SensorManager::checkWheelEnc(volatile int revolutions) {
+  double ret = 0;
+  ret = REVOLUTION_DISTANCE * revolutions;
+  return ret;
 }

@@ -36,6 +36,8 @@
 #define L_MOTOR_IN1 11
 #define L_MOTOR_IN2 12
 
+#define REVOLUTION_DISTANCE 0.4084
+
 // Enable pins for HBridge motors
 // can control voltage delivered
 // and as such the speed
@@ -59,6 +61,7 @@ public:
   void ultrasonic_poll(int work, sensor_states &sstates);
   int getUltrasonicDistance();
   void changeMotor(int motor);
+  double checkWheelEnc(volatile int revolutions);
 
 private:
   void ir_sensor_poll(sensor_states &sstates);

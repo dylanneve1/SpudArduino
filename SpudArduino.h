@@ -8,6 +8,8 @@
 #define BUGGY_WORK 1
 #define BUGGY_IDLE 0
 
+void encoderISR();
+
 // Data structure to store Arduino info
 struct arduino_states {
   unsigned long start_time;
