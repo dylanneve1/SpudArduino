@@ -138,6 +138,6 @@ int SensorManager::getUltrasonicDistance() {
 
 double SensorManager::checkWheelEnc(volatile int revolutions) {
   double ret = 0;
-  ret = REVOLUTION_DISTANCE * revolutions;
+  ret = (REVOLUTION_DISTANCE/2) * revolutions;
   return ret;
 }
