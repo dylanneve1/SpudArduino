@@ -144,5 +144,6 @@ double SensorManager::checkWheelEnc(volatile int leftRevolutions, volatile int r
   double ret = 0;
   ret = (REVOLUTION_DISTANCE/2) * leftRevolutions;
   ret += (REVOLUTION_DISTANCE/2) * rightRevolutions;
+  ret = ret * 0.25;
   return ret;
 }
