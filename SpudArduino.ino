@@ -26,7 +26,8 @@ double dist = 0;
 int work = BUGGY_IDLE;
 
 // Encoder revolution count
-volatile int revolutions = 0;
+volatile int leftRevolutions = 0;
+volatile int rightRevolutions = 0;
 
 // Setup function
 void setup() {
@@ -46,13 +47,13 @@ void setup() {
   wifi.setupAP();
   wifi.setupServer();
   // Setup interrupts for encoders
-  attachInterrupt(digitalPinToInterrupt(L_MOTOR_ENC), encoderISR, RISING); 
-  attachInterrupt(digitalPinToInterrupt(R_MOTOR_ENC), encoderISR, RISING); 
+  attachInterrupt(digitalPinToInterrupt(L_MOTOR_ENC), LencoderISR, RISING); 
+  attachInterrupt(digitalPinToInterrupt(R_MOTOR_ENC), RencoderISR, RISING); 
 }
 
 // Main loop
 void loop() {
-  dist = sensors.checkWheelEnc(revolutions);
+  dist = sensors.checkWheelEnc(leftRevolutions, rightRevolutions);
   // Check whether buggy has recieved
   // start or stop command and if it
   // has recieved the stop command then
@@ -78,10 +79,10 @@ void loop() {
     Serial.println("Sneaky first poll completed!");
   }
   if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
-    Serial.print("Current distance travelled: ");
-    Serial.println(dist);
-    Serial.print("Number of revolutions: ");
-    Serial.println(revolutions);
+    if (work == BUGGY_WORK) {
+      Serial.print("Current distance travelled: ");
+      Serial.println(dist);
+    }
     // Print current information
     printCurrentInfo();
     // Check for start/stop command from Processing
@@ -89,8 +90,12 @@ void loop() {
   }
 }
 
-void encoderISR() {
-  revolutions++;
+void LencoderISR() {
+  leftRevolutions++;
+}
+
+void RencoderISR() {
+  rightRevolutions++;
 }
 
 void printCurrentInfo() {

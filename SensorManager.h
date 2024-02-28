@@ -61,7 +61,7 @@ public:
   void ultrasonic_poll(int work, sensor_states &sstates);
   int getUltrasonicDistance();
   void changeMotor(int motor);
-  double checkWheelEnc(volatile int revolutions);
+  double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
 
 private:
   void ir_sensor_poll(sensor_states &sstates);
