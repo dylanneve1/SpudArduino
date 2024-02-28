@@ -105,5 +105,7 @@ void printCurrentInfo() {
   data += sstates.right_motor_speed;
   data += ",D:";
   data += String(sensors.getUltrasonicDistance());
+  data += ",T:";
+  data += dist;
   wifi.messageClient(data);
 }

@@ -36,7 +36,7 @@
 #define L_MOTOR_IN1 11
 #define L_MOTOR_IN2 12
 
-#define REVOLUTION_DISTANCE 0.4084
+#define REVOLUTION_DISTANCE 0.204
 
 // Enable pins for HBridge motors
 // can control voltage delivered
