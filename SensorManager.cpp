@@ -54,10 +54,10 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
       Serial.println("sensor_event: left state changed!");
       sstates.ir_left = intensity;
       if (intensity == SENSOR_HIGH) {
-        changeMotor(LEFT_MOTOR_ENABLE);
+        changeMotor(LEFT_MOTOR_ENABLE, sstates);
         Serial.println("Left motor enabled!");
       } else {
-        changeMotor(LEFT_MOTOR_DISABLE);
+        changeMotor(LEFT_MOTOR_DISABLE, sstates);
         Serial.println("Left motor disabled!");
       }
     }
@@ -66,10 +66,10 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
       Serial.println("sensor_event: right state changed!");
       sstates.ir_right = intensity;
       if (intensity == SENSOR_HIGH) {
-        changeMotor(RIGHT_MOTOR_ENABLE);
+        changeMotor(RIGHT_MOTOR_ENABLE, sstates);
         Serial.println("Right motor enabled!");
       } else {
-        changeMotor(RIGHT_MOTOR_DISABLE);
+        changeMotor(RIGHT_MOTOR_DISABLE, sstates);
         Serial.println("Right motor disabled!");
       }
     }
@@ -79,23 +79,27 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
 // Function to change motor states
 // between on and off for the left
 // and right motors
-void SensorManager::changeMotor(int motor) {
+void SensorManager::changeMotor(int motor, sensor_states &sstates) {
   if (motor == LEFT_MOTOR_ENABLE) {
-    analogWrite(L_MOTOR_EN, 210);
+    analogWrite(L_MOTOR_EN, MOTOR_SPEED_MAX);
     digitalWrite(L_MOTOR_IN1, HIGH);
     digitalWrite(L_MOTOR_IN2, LOW);
+    sstates.left_motor_speed = MOTOR_SPEED_MAX;
   } else if (motor == RIGHT_MOTOR_ENABLE) {
-    analogWrite(R_MOTOR_EN, 210);
+    analogWrite(R_MOTOR_EN, MOTOR_SPEED_MAX);
     digitalWrite(R_MOTOR_IN1, HIGH);
     digitalWrite(R_MOTOR_IN2, LOW);
+    sstates.right_motor_speed = MOTOR_SPEED_MAX;
   } else if (motor == LEFT_MOTOR_DISABLE) {
-    analogWrite(L_MOTOR_EN, 0);
+    analogWrite(L_MOTOR_EN, MOTOR_SPEED_MIN);
     digitalWrite(L_MOTOR_IN1, LOW);
     digitalWrite(L_MOTOR_IN2, LOW);
+    sstates.left_motor_speed = MOTOR_SPEED_MIN;
   } else if (motor == RIGHT_MOTOR_DISABLE) {
-    analogWrite(R_MOTOR_EN, 0);
+    analogWrite(R_MOTOR_EN, MOTOR_SPEED_MIN);
     digitalWrite(R_MOTOR_IN1, LOW);
     digitalWrite(R_MOTOR_IN2, LOW);
+    sstates.right_motor_speed = MOTOR_SPEED_MIN;
   }
 }
 
@@ -111,15 +115,15 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
       Serial.print(distance);
       Serial.println(" cm");
       Serial.println("YOU NEED TO STOP!");
-      changeMotor(LEFT_MOTOR_DISABLE);
-      changeMotor(RIGHT_MOTOR_DISABLE);
+      changeMotor(LEFT_MOTOR_DISABLE, sstates);
+      changeMotor(RIGHT_MOTOR_DISABLE, sstates);
       return;
     }
     if (sstates.ir_left == SENSOR_HIGH) {
-      changeMotor(LEFT_MOTOR_ENABLE);
+      changeMotor(LEFT_MOTOR_ENABLE, sstates);
     }
     if (sstates.ir_right == SENSOR_HIGH) {
-      changeMotor(RIGHT_MOTOR_ENABLE);
+      changeMotor(RIGHT_MOTOR_ENABLE, sstates);
     }
   }
 }

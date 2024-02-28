@@ -62,8 +62,8 @@ void loop() {
   // will audiomatically do that
   work = wifi.startStopCommandReceived();
   if (work != BUGGY_WORK) {
-    sensors.changeMotor(2);
-    sensors.changeMotor(3);
+    sensors.changeMotor(LEFT_MOTOR_DISABLE, sstates);
+    sensors.changeMotor(RIGHT_MOTOR_DISABLE, sstates);
   }
   
   // Set the current time before starting loop
@@ -100,9 +100,9 @@ void RencoderISR() {
 
 void printCurrentInfo() {
   String data = "L:";
-  data += 100;
+  data += sstates.left_motor_speed;
   data += ",R:";
-  data += 100;
+  data += sstates.right_motor_speed;
   data += ",D:";
   data += String(sensors.getUltrasonicDistance());
   wifi.messageClient(data);

@@ -8,6 +8,9 @@
 #define BUGGY_WORK 1
 #define BUGGY_IDLE 0
 
+#define MOTOR_SPEED_MAX 255
+#define MOTOR_SPEED_MIN 0
+
 void encoderISR();
 
 // Data structure to store Arduino info

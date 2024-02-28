@@ -50,6 +50,8 @@
 struct sensor_states {
   int ir_left = SENSOR_LOW;
   int ir_right = SENSOR_LOW;
+  int left_motor_speed = 0;
+  int right_motor_speed = 0;
 };
 
 // SensorManager class
@@ -60,7 +62,7 @@ public:
   void pinSetup();
   void ultrasonic_poll(int work, sensor_states &sstates);
   int getUltrasonicDistance();
-  void changeMotor(int motor);
+  void changeMotor(int motor, sensor_states &sstates);
   double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
 
 private:
