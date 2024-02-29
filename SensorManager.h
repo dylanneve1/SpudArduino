@@ -28,16 +28,18 @@
 // states between loops, we will default
 // to LOW state
 struct sensor_states {
-  int left_motor_speed = 0;
-  int right_motor_speed = 0;
+  int left_motor_speed;
+  int right_motor_speed;
 };
 
 // SensorManager class
 class SensorManager {
-
+private:
+  sensor_states* states;
 public:
+  SensorManager(sensor_states* states);
   void pinSetup();
-  void changeMotor(int motor, sensor_states &sstates);
+  void changeMotor(int motor);
 };
 
 #endif
