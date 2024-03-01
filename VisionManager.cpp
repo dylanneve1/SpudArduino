@@ -21,19 +21,19 @@ int VisionManager::FollowTrainedObject() {
   int ret;
   if (!lens->request()) {
     ret = LENS_REQUEST_FAILED;
-    if (ObjectLock = true) {
+    if (ObjectLock) {
       Serial.println("VisionManager: lost sight of target!");
       ObjectLock = false;
     }
   } else if(!lens->isLearned()) {
     ret = LENS_REQUEST_NOT_LEARNED;
-    if (ObjectLock = true) {
+    if (ObjectLock) {
       Serial.println("VisionManager: lost sight of target!");
       ObjectLock = false;
     }
   } else if(!lens->available()) {
     ret = LENS_REQUEST_DISSAPEARED;
-    if (ObjectLock = true) {
+    if (ObjectLock) {
       Serial.println("VisionManager: lost sight of target!");
       ObjectLock = false;
     }
