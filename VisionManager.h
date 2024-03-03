@@ -18,11 +18,11 @@
 class VisionManager {
 private:
   bool ObjectLock = false;
-  HUSKYLENS* lens;
-  SensorManager* sensors;
-  void AdjustMotors(double horizontal);
+  HUSKYLENS lens;
+  SensorManager sensors;
+  void AdjustMotors(double horizontal, int reset);
 public:
-  VisionManager(HUSKYLENS* lens, SensorManager* sensors);
+  VisionManager(HUSKYLENS &lens);
   bool VisionSetup();
   int FollowTrainedObject();
 };

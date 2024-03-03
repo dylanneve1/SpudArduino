@@ -35,9 +35,9 @@ struct sensor_states {
 // SensorManager class
 class SensorManager {
 private:
-  sensor_states* states;
+  sensor_states states;
 public:
-  SensorManager(sensor_states* states);
+  SensorManager();
   void pinSetup();
   void changeMotor(int motor);
 };
