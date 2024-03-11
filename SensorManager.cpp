@@ -110,7 +110,7 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
   if (work == BUGGY_WORK) {
     int distance = getUltrasonicDistance();
 
-    if (distance < 10.0) {
+    if (distance < 20.0) {
       Serial.print("Distance detected: ");
       Serial.print(distance);
       Serial.println(" cm");
