@@ -81,15 +81,13 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
 // and right motors
 void SensorManager::changeMotor(int motor, sensor_states &sstates) {
   if (motor == LEFT_MOTOR_ENABLE) {
-    analogWrite(L_MOTOR_EN, MOTOR_SPEED_MAX);
+    analogWrite(L_MOTOR_EN, sstates.left_motor_speed);
     digitalWrite(L_MOTOR_IN1, HIGH);
     digitalWrite(L_MOTOR_IN2, LOW);
-    sstates.left_motor_speed = MOTOR_SPEED_MAX;
   } else if (motor == RIGHT_MOTOR_ENABLE) {
-    analogWrite(R_MOTOR_EN, MOTOR_SPEED_MAX);
+    analogWrite(R_MOTOR_EN, sstates.right_motor_speed);
     digitalWrite(R_MOTOR_IN1, HIGH);
     digitalWrite(R_MOTOR_IN2, LOW);
-    sstates.right_motor_speed = MOTOR_SPEED_MAX;
   } else if (motor == LEFT_MOTOR_DISABLE) {
     analogWrite(L_MOTOR_EN, MOTOR_SPEED_MIN);
     digitalWrite(L_MOTOR_IN1, LOW);
@@ -119,11 +117,21 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
       changeMotor(RIGHT_MOTOR_DISABLE, sstates);
       return;
     }
-    if (sstates.ir_left == SENSOR_HIGH) {
-      changeMotor(LEFT_MOTOR_ENABLE, sstates);
-    }
-    if (sstates.ir_right == SENSOR_HIGH) {
-      changeMotor(RIGHT_MOTOR_ENABLE, sstates);
+    if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
+      if (distance > 10 && distance < 40) {
+        sstates.left_motor_speed = 200 + distance / 2;
+        sstates.right_motor_speed = 200 + distance / 2;
+      } else {
+        sstates.left_motor_speed = 240;
+        sstates.right_motor_speed = 240;
+      }
+      if (sstates.ir_left == SENSOR_HIGH) {
+        changeMotor(LEFT_MOTOR_ENABLE, sstates);
+      }
+      if (sstates.ir_right == SENSOR_HIGH) {
+        changeMotor(RIGHT_MOTOR_ENABLE, sstates);
+      }
+      Serial.println(sstates.left_motor_speed);
     }
   }
 }
@@ -142,8 +150,8 @@ int SensorManager::getUltrasonicDistance() {
 
 double SensorManager::checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions) {
   double ret = 0;
-  ret = (REVOLUTION_DISTANCE/2) * leftRevolutions;
-  ret += (REVOLUTION_DISTANCE/2) * rightRevolutions;
+  ret = (REVOLUTION_DISTANCE / 2) * leftRevolutions;
+  ret += (REVOLUTION_DISTANCE / 2) * rightRevolutions;
   ret = ret * 0.25;
   return ret;
 }

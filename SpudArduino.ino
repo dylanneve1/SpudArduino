@@ -70,7 +70,7 @@ void loop() {
   astates.current_time = millis();
   // Sensors
   sensors.probe(work, sstates);
-  if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || firstPoll) {
+  if (millis() - astates.last_update_time >= 500 || firstPoll) {
     sensors.ultrasonic_poll(work, sstates);
     astates.last_update_time = millis();
   }
