@@ -1,6 +1,10 @@
 #ifndef SENSOR_MANAGER_H
 #define SENSOR_MANAGER_H
 
+// Control modes
+#define REFERENCE_OBJECT_CONTROL 46
+#define MANUAL_USER_CONTROL 47
+
 // Right and left motor macros
 #define LEFT_MOTOR_ENABLE   0
 #define RIGHT_MOTOR_ENABLE  1
@@ -52,6 +56,7 @@ struct sensor_states {
   int ir_right = SENSOR_LOW;
   int left_motor_speed = 0;
   int right_motor_speed = 0;
+  int control_mode = REFERENCE_OBJECT_CONTROL;
 };
 
 // SensorManager class
