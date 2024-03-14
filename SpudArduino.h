@@ -19,6 +19,11 @@ struct arduino_states {
   unsigned long current_time;
   unsigned long last_update_time;
   unsigned long last_server_time;
+  unsigned long last_distance_time;
+  bool first_distance_checked = false;
+  double dist = 0;
+  double last_dist = 0;
+  double avg_v = 0;
 };
 
 #endif

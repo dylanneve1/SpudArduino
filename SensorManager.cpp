@@ -155,3 +155,13 @@ double SensorManager::checkWheelEnc(volatile int leftRevolutions, volatile int r
   ret = ret * 0.25;
   return ret;
 }
+
+double SensorManager::checkAvgSpeed(double &dist, double &last_dist, unsigned int &last_time) {
+  double ret = 0;
+  delta_dist = dist - last_dist;
+  delta_time = millis() - last_time;
+  ret = delta_dist / delta_time;
+  last_time = millis();
+  last_dist = dist;
+  return ret;
+}

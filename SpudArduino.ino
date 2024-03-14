@@ -17,9 +17,6 @@ bool motorsEnabled = false;
 // Check if US has been polled
 bool firstPoll = true;
 
-// Distance travelled by buggy
-double dist = 0;
-
 // Current state of buggy
 // work == BUGGY_IDLE means off
 // work == BUGGY_WORK means on
@@ -53,7 +50,14 @@ void setup() {
 
 // Main loop
 void loop() {
-  dist = sensors.checkWheelEnc(leftRevolutions, rightRevolutions);
+  astates.dist = sensors.checkWheelEnc(leftRevolutions, rightRevolutions);
+  if(!astates.first_distance_checked) {
+    astates.avg_v = sensors.checkAvgSpeed(astates.dist, astates.last_dist, astates.last_distance_time);
+  } else {
+    astates.avg_v = astates.dist / (millis() - astates.start_time);
+    astates.first_distance_checked = true;
+    astates.last_distance_time = millis();
+  }
   // Check whether buggy has recieved
   // start or stop command and if it
   // has recieved the stop command then
@@ -81,7 +85,7 @@ void loop() {
   if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
     if (work == BUGGY_WORK) {
       Serial.print("Current distance travelled: ");
-      Serial.println(dist);
+      Serial.println(astates.dist);
     }
     // Print current information
     printCurrentInfo();
@@ -106,6 +110,6 @@ void printCurrentInfo() {
   data += ",D:";
   data += String(sensors.getUltrasonicDistance());
   data += ",T:";
-  data += dist;
+  data += astates.dist;
   wifi.messageClient(data);
 }
