@@ -29,6 +29,14 @@ void SensorManager::probe(int work, sensor_states &sstates) {
   }
 }
 
+// void SensorManager::controlmode(char mode, sensor_states &sstates) {
+//   if (mode == 'U') {
+//     sstates.control_mode = MANUAL_USER_CONTROL;
+//   } else if (mode == 'R') {
+//     sstates.control_mode = REFERENCE_OBJECT_CONTROL;
+//   }
+// }
+
 void SensorManager::ir_sensor_poll(sensor_states &sstates) {
   if (digitalRead(LEYE) != HIGH) {
     ir_sensor_event(LEVENT, SENSOR_LOW, sstates);
@@ -133,6 +141,10 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
       }
       Serial.println(sstates.left_motor_speed);
     }
+    // else if (sstates.control_mode== MANUAL_USER_CONTROL)
+    // {
+      
+    // }
   }
 }
 

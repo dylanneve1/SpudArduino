@@ -14,6 +14,7 @@ public:
   void setupServer();
   void messageClient(String message);
   int startStopCommandReceived();
+  int motorspeed(int motors);
 private:
   WiFiServer server;
   WiFiClient client;

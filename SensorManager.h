@@ -69,7 +69,7 @@ public:
   int getUltrasonicDistance();
   void changeMotor(int motor, sensor_states &sstates);
   double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
-  double checkAvgSpeed(double dist, double &last_dist, unsigned int &last_time);
+  double checkAvgSpeed(double &dist, double &last_dist, unsigned int &last_time);
 
 private:
   void ir_sensor_poll(sensor_states &sstates);
