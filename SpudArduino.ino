@@ -13,8 +13,10 @@
 #define BUGGY_IDLE 0
 
 // Max and min motor pwm values
-#define MOTOR_SPEED_MAX 255
-#define MOTOR_SPEED_MIN 0
+// Range is currently 40
+#define MOTOR_SPEED_MAX 120
+#define MOTOR_SPEED_BASE 80
+#define MOTOR_SPEED_NONE 0
 
 // Control modes
 #define REFERENCE_OBJECT_CONTROL 4
@@ -220,11 +222,11 @@ void ultrasonic_poll() {
     } else if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
       // Adjust motor speeds based on distance to reference object
       if (distance > 10 && distance < 40) {
-        sstates.left_motor_speed = 50 + distance / 2;
-        sstates.right_motor_speed = 50 + distance / 2;
+        sstates.left_motor_speed = MOTOR_SPEED_BASE + distance / 2;
+        sstates.right_motor_speed = MOTOR_SPEED_BASE + distance / 2;
       } else {
-        sstates.left_motor_speed = 90;
-        sstates.right_motor_speed = 90;
+        sstates.left_motor_speed = MOTOR_SPEED_MAX;
+        sstates.right_motor_speed = MOTOR_SPEED_MAX;
       }
       // Enable motors based on IR sensor readings
       if (sstates.ir_left == SENSOR_HIGH) {
@@ -259,11 +261,11 @@ void changeMotor(int motor) {
   } else if (motor == LEFT_MOTOR_DISABLE_CMD) {
     digitalWrite(L_MOTOR_IN1, LOW);
     digitalWrite(L_MOTOR_IN2, LOW);
-    sstates.left_motor_speed = MOTOR_SPEED_MIN;
+    sstates.left_motor_speed = MOTOR_SPEED_NONE;
   } else if (motor == RIGHT_MOTOR_DISABLE_CMD) {
     digitalWrite(R_MOTOR_IN1, LOW);
     digitalWrite(R_MOTOR_IN2, LOW);
-    sstates.right_motor_speed = MOTOR_SPEED_MIN;
+    sstates.right_motor_speed = MOTOR_SPEED_NONE;
   }
 }
 
