@@ -155,6 +155,7 @@ void loop() {
   // Server communication
   if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
     work = startStopCommandReceived();
+    Serial.println(astates.avg_v);
     if (work == BUGGY_WORK) {
       Serial.print("Current distance travelled: ");
       Serial.println(astates.dist);
@@ -305,8 +306,10 @@ void printCurrentInfo() {
 }
 
 int startStopCommandReceived() {
+  return 1;
   Serial.println("Checking start/stop");
-  //if (client.available()) {
+  if (client.available()) {
+    Serial.println("hi");
     std::string command = "B:1,M:4,S:100";//client.readStringUntil('\n');
     String command_e = client.readStringUntil('\n');
     Serial.println(command_e);
@@ -321,7 +324,7 @@ int startStopCommandReceived() {
     Serial.println(work);
     Serial.println(sstates.left_motor_speed);
     return work;
-  //} else {
-  //  return work;
-  //}
+  } else {
+    return work;
+  }
 }
