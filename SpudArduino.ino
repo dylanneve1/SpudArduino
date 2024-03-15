@@ -306,8 +306,10 @@ void printCurrentInfo() {
 
 int startStopCommandReceived() {
   Serial.println("Checking start/stop");
-  if (client.available()) {
-    std::string command = client.readStringUntil('\n');
+  //if (client.available()) {
+    std::string command = "B:1,M:4,S:100";//client.readStringUntil('\n');
+    String command_e = client.readStringUntil('\n');
+    Serial.println(command_e);
     std::regex pattern(R"(B:(\d+),M:(\d+),S:(\d+))");
     std::smatch match;
     if (std::regex_match(command, match, pattern)) {
@@ -319,7 +321,7 @@ int startStopCommandReceived() {
     Serial.println(work);
     Serial.println(sstates.left_motor_speed);
     return work;
-  } else {
-    return work;
-  }
+  //} else {
+  //  return work;
+  //}
 }
