@@ -155,6 +155,8 @@ void loop() {
   // Server communication
   if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
     work = startStopCommandReceived();
+    Serial.print("Work return: ");
+    Serial.println(work);
     Serial.println(astates.avg_v);
     if (work == BUGGY_WORK) {
       Serial.print("Current distance travelled: ");
@@ -306,13 +308,12 @@ void printCurrentInfo() {
 }
 
 int startStopCommandReceived() {
-  return 1;
   Serial.println("Checking start/stop");
   if (client.available()) {
     Serial.println("hi");
-    std::string command = "B:1,M:4,S:100";//client.readStringUntil('\n');
+    //std::string command = "B:1,M:4,S:100";//client.readStringUntil('\n');
     String command_e = client.readStringUntil('\n');
-    Serial.println(command_e);
+    std::string command = command_e.c_str();
     std::regex pattern(R"(B:(\d+),M:(\d+),S:(\d+))");
     std::smatch match;
     if (std::regex_match(command, match, pattern)) {
@@ -321,8 +322,16 @@ int startStopCommandReceived() {
       sstates.left_motor_speed = std::stoi(match[3]);
       sstates.right_motor_speed = std::stoi(match[3]);
     }
+    Serial.print("Work: ");
     Serial.println(work);
+    Serial.print("Control mode: ");
+    Serial.println(sstates.control_mode);
+    Serial.print("Speed: ");
     Serial.println(sstates.left_motor_speed);
+    if (work == 0) {
+      changeMotor(LEFT_MOTOR_DISABLE_CMD);
+      changeMotor(RIGHT_MOTOR_DISABLE_CMD);
+    }
     return work;
   } else {
     return work;
