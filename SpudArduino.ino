@@ -7,6 +7,7 @@
 // Timeframes
 #define SERVER_POLL_TIMEFRAME 2000
 #define US_POLL_TIMEFRAME 500
+#define SPEED_CALC_POLL_TIMEFRAME 1000
 
 // Buggy working or idle
 #define BUGGY_WORK 1
@@ -20,6 +21,7 @@
 
 // Control modes
 #define REFERENCE_OBJECT_CONTROL 4
+#define REFERENCE_SPEED_CONTROL 0
 
 // Sensor constants
 #define SENSOR_LOW 0
@@ -60,8 +62,9 @@
 struct sensor_states {
   int ir_left = SENSOR_LOW;
   int ir_right = SENSOR_LOW;
-  int left_motor_speed = 0;
-  int right_motor_speed = 0;
+  int left_motor_speed = MOTOR_SPEED_BASE;
+  int right_motor_speed = MOTOR_SPEED_BASE;
+  int reference_speed;
   int control_mode = REFERENCE_OBJECT_CONTROL;
 };
 
@@ -71,6 +74,7 @@ struct arduino_states {
   unsigned long last_update_time = 0;
   unsigned long last_server_time = 0;
   unsigned long last_distance_time = 0;
+  unsigned long last_speed_calc_time = 0;
   bool first_distance_checked = false;
   double dist = 0;
   double last_dist = 0;
@@ -142,28 +146,40 @@ void loop() {
   }
   firstPoll = false;
 
-  // Wheel encoder distance and avg speed calculation
-  astates.dist = checkWheelEnc();
-  if (!astates.first_distance_checked) {
-    astates.avg_v = checkAvgSpeed();
-  } else {
-    astates.avg_v = astates.dist / (millis() - astates.start_time);
-    astates.first_distance_checked = true;
-    astates.last_distance_time = millis();
-  }
 
   // Server communication
   if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
     work = startStopCommandReceived();
-    Serial.print("Work return: ");
-    Serial.println(work);
-    Serial.println(astates.avg_v);
     if (work == BUGGY_WORK) {
       Serial.print("Current distance travelled: ");
       Serial.println(astates.dist);
     }
     printCurrentInfo();
     astates.last_server_time = millis();
+  }
+
+  if (millis() - astates.last_speed_calc_time >= SPEED_CALC_POLL_TIMEFRAME) {
+    // Avg speed
+    // Wheel encoder distance and avg speed calculation
+    astates.dist = checkWheelEnc();
+    if (!astates.first_distance_checked) {
+      astates.avg_v = checkAvgSpeed();
+    } else {
+      astates.avg_v = astates.dist / ((millis() - astates.start_time) / 1000);
+      astates.first_distance_checked = true;
+      astates.last_distance_time = millis();
+    }
+    if (sstates.control_mode == REFERENCE_SPEED_CONTROL) {
+      alignBuggySpeed();
+      writeMotorSpeed();
+      Serial.print("Current work: ");
+      Serial.println(work);
+      Serial.print("Current reference speed: ");
+      Serial.println(sstates.reference_speed);
+      Serial.print("Average measured speed: ");
+      Serial.println(astates.avg_v);
+    }
+    astates.last_speed_calc_time = millis();
   }
 }
 
@@ -272,6 +288,11 @@ void changeMotor(int motor) {
   }
 }
 
+void writeMotorSpeed() {
+  analogWrite(L_MOTOR_EN, sstates.left_motor_speed);
+  analogWrite(R_MOTOR_EN, sstates.right_motor_speed);
+}
+
 // *** Wheel Encoder Functions ***
 
 double checkWheelEnc() {
@@ -283,9 +304,11 @@ double checkWheelEnc() {
 double checkAvgSpeed() {
   double delta_dist = astates.dist - astates.last_dist;
   unsigned int delta_time = millis() - astates.last_distance_time;
+  delta_time = delta_time / 1000;
   double ret = delta_dist / delta_time;
   astates.last_dist = astates.dist;
   astates.last_distance_time = millis();
+  ret *= 100;
   return ret;
 }
 
@@ -308,9 +331,8 @@ void printCurrentInfo() {
 }
 
 int startStopCommandReceived() {
-  Serial.println("Checking start/stop");
+  //return 1;
   if (client.available()) {
-    Serial.println("hi");
     //std::string command = "B:1,M:4,S:100";//client.readStringUntil('\n');
     String command_e = client.readStringUntil('\n');
     std::string command = command_e.c_str();
@@ -319,15 +341,8 @@ int startStopCommandReceived() {
     if (std::regex_match(command, match, pattern)) {
       work = std::stoi(match[1]);
       sstates.control_mode = std::stoi(match[2]);
-      sstates.left_motor_speed = std::stoi(match[3]);
-      sstates.right_motor_speed = std::stoi(match[3]);
+      sstates.reference_speed = std::stoi(match[3]);
     }
-    Serial.print("Work: ");
-    Serial.println(work);
-    Serial.print("Control mode: ");
-    Serial.println(sstates.control_mode);
-    Serial.print("Speed: ");
-    Serial.println(sstates.left_motor_speed);
     if (work == 0) {
       changeMotor(LEFT_MOTOR_DISABLE_CMD);
       changeMotor(RIGHT_MOTOR_DISABLE_CMD);
@@ -335,5 +350,15 @@ int startStopCommandReceived() {
     return work;
   } else {
     return work;
+  }
+}
+
+void alignBuggySpeed() {
+  if (astates.avg_v > sstates.reference_speed) {
+    sstates.left_motor_speed -= 5;
+    sstates.right_motor_speed -= 5;
+  } else {
+    sstates.left_motor_speed += 5;
+    sstates.right_motor_speed += 5;
   }
 }
