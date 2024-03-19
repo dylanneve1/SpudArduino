@@ -172,7 +172,9 @@ void loop() {
       ultrasonic_poll();
       astates.last_update_time = astates.current_time;
     }
-    firstPoll = false;
+    if (firstPoll) {
+      firstPoll = false;
+    }
   }
 
   // Server communication
@@ -197,15 +199,9 @@ void loop() {
       astates.first_distance_checked = true;
       astates.last_distance_time = astates.current_time;
     }
-    if (sstates.control_mode == REFERENCE_SPEED_CONTROL) {
+    if (sstates.control_mode == REFERENCE_SPEED_CONTROL && work == BUGGY_WORK) {
       alignBuggySpeed();
       writeMotorSpeed();
-      Serial.print("Current work: ");
-      Serial.println(work);
-      Serial.print("Current reference speed: ");
-      Serial.println(sstates.reference_speed);
-      Serial.print("Average measured speed: ");
-      Serial.println(astates.avg_v);
     }
     astates.last_speed_calc_time = astates.current_time;
   }
