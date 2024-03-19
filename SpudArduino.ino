@@ -128,8 +128,8 @@ void setup() {
 
   // Initial states
   astates.start_time = millis();
-  astates.last_update_time = millis();
-  astates.last_server_time = millis();
+  astates.last_update_time = astates.start_time;
+  astates.last_server_time = astates.start_time;
 }
 
 void loop() {
@@ -141,34 +141,34 @@ void loop() {
     ir_sensor_poll();
 
     // Ultrasonic sensor polling
-    if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || firstPoll) {
+    if (astates.current_time - astates.last_update_time >= US_POLL_TIMEFRAME || firstPoll) {
       ultrasonic_poll();
-      astates.last_update_time = millis();
+      astates.last_update_time = astates.current_time;
     }
     firstPoll = false;
   }
 
   // Server communication
-  if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
+  if (astates.current_time - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
     work = startStopCommandReceived();
     if (work == BUGGY_WORK) {
       Serial.print("Current distance travelled: ");
       Serial.println(astates.dist);
     }
     printCurrentInfo();
-    astates.last_server_time = millis();
+    astates.last_server_time = astates.current_time;
   }
 
-  if (millis() - astates.last_speed_calc_time >= SPEED_CALC_POLL_TIMEFRAME) {
+  if (astates.current_time - astates.last_speed_calc_time >= SPEED_CALC_POLL_TIMEFRAME) {
     // Avg speed
     // Wheel encoder distance and avg speed calculation
     astates.dist = checkWheelEnc();
     if (!astates.first_distance_checked) {
       astates.avg_v = checkAvgSpeed();
     } else {
-      astates.avg_v = astates.dist / ((millis() - astates.start_time) / 1000);
+      astates.avg_v = astates.dist / ((astates.current_time - astates.start_time) / 1000);
       astates.first_distance_checked = true;
-      astates.last_distance_time = millis();
+      astates.last_distance_time = astates.current_time;
     }
     if (sstates.control_mode == REFERENCE_SPEED_CONTROL) {
       alignBuggySpeed();
@@ -180,7 +180,7 @@ void loop() {
       Serial.print("Average measured speed: ");
       Serial.println(astates.avg_v);
     }
-    astates.last_speed_calc_time = millis();
+    astates.last_speed_calc_time = astates.current_time;
   }
 }
 
@@ -287,11 +287,11 @@ double checkWheelEnc() {
 
 double checkAvgSpeed() {
   double delta_dist = astates.dist - astates.last_dist;
-  unsigned int delta_time = millis() - astates.last_distance_time;
+  unsigned int delta_time = astates.current_time - astates.last_distance_time;
   delta_time = delta_time / 1000;
   double ret = delta_dist / delta_time;
   astates.last_dist = astates.dist;
-  astates.last_distance_time = millis();
+  astates.last_distance_time = astates.current_time;
   ret *= 100;
   return ret;
 }
