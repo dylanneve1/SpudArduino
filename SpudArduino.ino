@@ -323,6 +323,8 @@ void printCurrentInfo() {
   data += String(getUltrasonicDistance());
   data += ",T:";
   data += astates.dist;
+  data += ",S:";
+  data+= String(astates.avg_v);
   client = server.available();
   if (client.connected()) {
     client.write(data.c_str());
