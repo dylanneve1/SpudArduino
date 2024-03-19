@@ -23,6 +23,17 @@
 #define REFERENCE_OBJECT_CONTROL 4
 #define REFERENCE_SPEED_CONTROL 0
 
+// PID variables
+double kp = (1/7.3);
+double ki = 1/20;
+double kd = 2;
+double elapsedTime;
+double error;
+double lastError;
+const double setPoint = 20;
+double cumError, rateError;
+int savedSpeed = 100;
+
 // Sensor constants
 #define SENSOR_LOW 0
 #define SENSOR_HIGH 1
@@ -75,6 +86,7 @@ struct arduino_states {
   unsigned long last_server_time = 0;
   unsigned long last_distance_time = 0;
   unsigned long last_speed_calc_time = 0;
+  unsigned long last_pid_calc_time = 0;
   bool first_distance_checked = false;
   double dist = 0;
   double last_dist = 0;
@@ -105,6 +117,7 @@ double checkWheelEnc();
 double checkAvgSpeed();
 void printCurrentInfo();
 int startStopCommandReceived();
+double computePID(double inp);
 
 void setup() {
   // Initialization
@@ -130,6 +143,7 @@ void setup() {
   astates.start_time = millis();
   astates.last_update_time = astates.start_time;
   astates.last_server_time = astates.start_time;
+  astates.last_pid_calc_time = astates.start_time;
 }
 
 void loop() {
@@ -224,13 +238,17 @@ void ultrasonic_poll() {
     changeMotor(LEFT_MOTOR_DISABLE_CMD);
     changeMotor(RIGHT_MOTOR_DISABLE_CMD);
   } else if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
-    // Adjust motor speeds based on distance to reference object
-    if (distance > 10 && distance < 40) {
-      sstates.left_motor_speed = MOTOR_SPEED_BASE + distance / 2;
-      sstates.right_motor_speed = MOTOR_SPEED_BASE + distance / 2;
+    double pid_result = computePID(distance);
+    int pid_speed = 100 + 20*abs(pid_result);
+    if (pid_speed <= 255) {
+      Serial.print("PID_SPEED: ");
+      Serial.println(pid_speed);
+      sstates.left_motor_speed = pid_speed;
+      sstates.right_motor_speed = pid_speed;
+      savedSpeed = pid_speed;
     } else {
-      sstates.left_motor_speed = MOTOR_SPEED_MAX;
-      sstates.right_motor_speed = MOTOR_SPEED_MAX;
+      sstates.left_motor_speed = savedSpeed;
+      sstates.right_motor_speed = savedSpeed;
     }
     // Enable motors based on IR sensor readings
     if (sstates.ir_left == SENSOR_HIGH) {
@@ -317,7 +335,6 @@ void printCurrentInfo() {
 }
 
 int startStopCommandReceived() {
-  //return 1;
   if (client.available()) {
     //std::string command = "B:1,M:4,S:100";//client.readStringUntil('\n');
     String command_e = client.readStringUntil('\n');
@@ -347,4 +364,19 @@ void alignBuggySpeed() {
     sstates.left_motor_speed += 5;
     sstates.right_motor_speed += 5;
   }
+}
+
+double computePID(double inp) {   
+    elapsedTime = (double)(astates.current_time - astates.last_pid_calc_time); //compute time elapsed from previous computation
+    
+    error = (setPoint - inp);
+    cumError += error * elapsedTime;
+    rateError = (error - lastError)/elapsedTime;
+
+    double ret = kp*error + ki*cumError + kd*rateError;         
+
+    lastError = error;
+    astates.last_pid_calc_time = astates.current_time;
+  
+    return ret;
 }
