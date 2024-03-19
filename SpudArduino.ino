@@ -3,6 +3,8 @@
 #include <sstream>
 #include <string>
 #include <regex>
+#include "Arduino_LED_Matrix.h"
+#include "frames.h"
 
 // Timeframes
 #define SERVER_POLL_TIMEFRAME 2000
@@ -98,6 +100,7 @@ sensor_states sstates;
 arduino_states astates;
 WiFiServer server(5200);
 WiFiClient client;
+ArduinoLEDMatrix matrix;
 volatile int leftRevolutions = 0;
 volatile int rightRevolutions = 0;
 int work = BUGGY_IDLE;
@@ -122,6 +125,7 @@ double computePID(double inp);
 void setup() {
   // Initialization
   Serial.begin(9600);
+  matrix.begin();
   WiFi.beginAP("SpudArduino", "Arduino2024");
   server.begin();
   pinMode(LEYE, INPUT);
@@ -147,6 +151,15 @@ void setup() {
 }
 
 void loop() {
+  if (work == BUGGY_WORK) {
+    if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
+      matrix.renderBitmap(work_obj_frame, 8, 12);
+    } else {
+      matrix.renderBitmap(work_speed_frame, 8, 12); 
+    }
+  } else {
+    matrix.renderBitmap(off_frame, 8, 12);
+  }
   // Update state variables
   astates.current_time = millis();
 
@@ -326,7 +339,7 @@ void printCurrentInfo() {
   data += ",T:";
   data += astates.dist;
   data += ",S:";
-  data+= String(astates.avg_v);
+  data += String(astates.avg_v);
   client = server.available();
   if (client.connected()) {
     client.write(data.c_str());
