@@ -137,15 +137,16 @@ void loop() {
   astates.current_time = millis();
 
   // IR sensor polling
-  ir_sensor_poll();
+  if (work == BUGGY_WORK) {
+    ir_sensor_poll();
 
-  // Ultrasonic sensor polling (if enabled)
-  if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || firstPoll) {
-    ultrasonic_poll();
-    astates.last_update_time = millis();
+    // Ultrasonic sensor polling
+    if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || firstPoll) {
+      ultrasonic_poll();
+      astates.last_update_time = millis();
+    }
+    firstPoll = false;
   }
-  firstPoll = false;
-
 
   // Server communication
   if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
@@ -196,64 +197,47 @@ void RencoderISR() {
 // *** Sensor Functions ***
 
 void ir_sensor_poll() {
-  if (work == BUGGY_WORK) {  // Only poll IR sensors if buggy is working
-    if (digitalRead(LEYE) != HIGH) {
-      ir_sensor_event(LEVENT, SENSOR_LOW);
-    } else {
-      ir_sensor_event(LEVENT, SENSOR_HIGH);
-    }
-
-    if (digitalRead(REYE) != HIGH) {
-      ir_sensor_event(REVENT, SENSOR_LOW);
-    } else {
-      ir_sensor_event(REVENT, SENSOR_HIGH);
-    }
-  }
+  ir_sensor_event(LEVENT, digitalRead(LEYE) == HIGH ? SENSOR_HIGH : SENSOR_LOW);
+  ir_sensor_event(REVENT, digitalRead(REYE) == HIGH ? SENSOR_HIGH : SENSOR_LOW);
 }
 
 void ir_sensor_event(int event, int intensity) {
-  if (event == LEVENT) {
-    if (intensity != sstates.ir_left) {
-      Serial.println("sensor_event: left state changed!");
-      sstates.ir_left = intensity;
-      changeMotor(intensity == SENSOR_HIGH ? LEFT_MOTOR_ENABLE_CMD : LEFT_MOTOR_DISABLE_CMD);
-    }
-  } else if (event == REVENT) {
-    if (intensity != sstates.ir_right) {
-      Serial.println("sensor_event: right state changed!");
-      sstates.ir_right = intensity;
-      changeMotor(intensity == SENSOR_HIGH ? RIGHT_MOTOR_ENABLE_CMD : RIGHT_MOTOR_DISABLE_CMD);
-    }
+  if (event == LEVENT && intensity != sstates.ir_left) {
+    Serial.println("sensor_event: left state changed!");
+    sstates.ir_left = intensity;
+    changeMotor(intensity == SENSOR_HIGH ? LEFT_MOTOR_ENABLE_CMD : LEFT_MOTOR_DISABLE_CMD);
+  } else if (event == REVENT && intensity != sstates.ir_right) {
+    Serial.println("sensor_event: right state changed!");
+    sstates.ir_right = intensity;
+    changeMotor(intensity == SENSOR_HIGH ? RIGHT_MOTOR_ENABLE_CMD : RIGHT_MOTOR_DISABLE_CMD);
   }
 }
 
 void ultrasonic_poll() {
-  if (work == BUGGY_WORK) {
-    int distance = getUltrasonicDistance();
+  int distance = getUltrasonicDistance();
 
-    if (distance < 20.0) {
-      Serial.print("Distance detected: ");
-      Serial.print(distance);
-      Serial.println(" cm");
-      Serial.println("YOU NEED TO STOP!");
-      changeMotor(LEFT_MOTOR_DISABLE_CMD);
-      changeMotor(RIGHT_MOTOR_DISABLE_CMD);
-    } else if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
-      // Adjust motor speeds based on distance to reference object
-      if (distance > 10 && distance < 40) {
-        sstates.left_motor_speed = MOTOR_SPEED_BASE + distance / 2;
-        sstates.right_motor_speed = MOTOR_SPEED_BASE + distance / 2;
-      } else {
-        sstates.left_motor_speed = MOTOR_SPEED_MAX;
-        sstates.right_motor_speed = MOTOR_SPEED_MAX;
-      }
-      // Enable motors based on IR sensor readings
-      if (sstates.ir_left == SENSOR_HIGH) {
-        changeMotor(LEFT_MOTOR_ENABLE_CMD);
-      }
-      if (sstates.ir_right == SENSOR_HIGH) {
-        changeMotor(RIGHT_MOTOR_ENABLE_CMD);
-      }
+  if (distance < 20.0) {
+    Serial.print("Distance detected: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+    Serial.println("YOU NEED TO STOP!");
+    changeMotor(LEFT_MOTOR_DISABLE_CMD);
+    changeMotor(RIGHT_MOTOR_DISABLE_CMD);
+  } else if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
+    // Adjust motor speeds based on distance to reference object
+    if (distance > 10 && distance < 40) {
+      sstates.left_motor_speed = MOTOR_SPEED_BASE + distance / 2;
+      sstates.right_motor_speed = MOTOR_SPEED_BASE + distance / 2;
+    } else {
+      sstates.left_motor_speed = MOTOR_SPEED_MAX;
+      sstates.right_motor_speed = MOTOR_SPEED_MAX;
+    }
+    // Enable motors based on IR sensor readings
+    if (sstates.ir_left == SENSOR_HIGH) {
+      changeMotor(LEFT_MOTOR_ENABLE_CMD);
+    }
+    if (sstates.ir_right == SENSOR_HIGH) {
+      changeMotor(RIGHT_MOTOR_ENABLE_CMD);
     }
   }
 }
