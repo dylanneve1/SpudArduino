@@ -386,9 +386,7 @@ int startStopCommandReceived() {
 
 void alignBuggySpeed() {
   if (astates.avg_v > sstates.reference_speed) {
-    convertedRefSpeed -= 5;
-  } else {
-    convertedRefSpeed += 5;
+    convertedRefSpeed += sstates.reference_speed - astates.avg_v;
   }
   if (convertedRefSpeed >= 150) {
     convertedRefSpeed = 150;
