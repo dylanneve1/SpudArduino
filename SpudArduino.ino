@@ -105,6 +105,7 @@ volatile int leftRevolutions = 0;
 volatile int rightRevolutions = 0;
 int work = BUGGY_IDLE;
 bool firstPoll = true;
+int convertedRefSpeed = 100;
 
 // Function prototypes
 void setup();
@@ -303,8 +304,12 @@ void changeMotor(int motor) {
 }
 
 void writeMotorSpeed() {
-  analogWrite(L_MOTOR_EN, sstates.left_motor_speed);
-  analogWrite(R_MOTOR_EN, sstates.right_motor_speed);
+  if (digitalRead(LEYE) == HIGH) {
+    analogWrite(L_MOTOR_EN, sstates.left_motor_speed);
+  }
+  if (digitalRead(REYE) == HIGH) {
+    analogWrite(R_MOTOR_EN, sstates.right_motor_speed);
+  }
 }
 
 // *** Wheel Encoder Functions ***
@@ -347,9 +352,9 @@ void printCurrentInfo() {
 }
 
 int startStopCommandReceived() {
-  sstates.control_mode = 0;
-  sstates.reference_speed = 10;
-  return 1;
+//  sstates.control_mode = 0;
+//  sstates.reference_speed = 10;
+//  return 1;
   if (client.available()) {
     //std::string command = "B:1,M:4,S:100";//client.readStringUntil('\n');
     String command_e = client.readStringUntil('\n');
@@ -373,11 +378,15 @@ int startStopCommandReceived() {
 
 void alignBuggySpeed() {
   if (astates.avg_v > sstates.reference_speed) {
-    sstates.left_motor_speed -= 5;
-    sstates.right_motor_speed -= 5;
+    convertedRefSpeed -= 5;
   } else {
-    sstates.left_motor_speed += 5;
-    sstates.right_motor_speed += 5;
+    convertedRefSpeed += 5;
+  }
+  if (digitalRead(LEYE) == HIGH) {
+    sstates.left_motor_speed = convertedRefSpeed;
+  }
+  if (digitalRead(REYE) == HIGH) {
+    sstates.right_motor_speed = convertedRefSpeed;
   }
 }
 
