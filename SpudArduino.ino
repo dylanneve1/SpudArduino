@@ -186,17 +186,6 @@ void loop() {
     }
   }
 
-  // Server communication
-  if (astates.current_time - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
-    work = startStopCommandReceived();
-    if (work == BUGGY_WORK) {
-      Serial.print("Current distance travelled: ");
-      Serial.println(astates.dist);
-    }
-    printCurrentInfo();
-    astates.last_server_time = astates.current_time;
-  }
-
   if (astates.current_time - astates.last_speed_calc_time >= SPEED_CALC_POLL_TIMEFRAME) {
     // Avg speed
     // Wheel encoder distance and avg speed calculation
@@ -213,6 +202,20 @@ void loop() {
       writeMotorSpeed();
     }
     astates.last_speed_calc_time = astates.current_time;
+  }
+
+  // Server communication
+  if (astates.current_time - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
+    work = startStopCommandReceived();
+    if (work == BUGGY_WORK) {
+      Serial.print("Current distance travelled: ");
+      Serial.println(astates.dist);
+    } else {
+      changeMotor(LEFT_MOTOR_DISABLE_CMD);
+      changeMotor(RIGHT_MOTOR_DISABLE_CMD);
+    }
+    printCurrentInfo();
+    astates.last_server_time = astates.current_time;
   }
 }
 
@@ -279,6 +282,7 @@ void ultrasonic_poll() {
       sstates.left_motor_speed = savedSpeed;
       sstates.right_motor_speed = savedSpeed;
     }
+  } else {
     // Enable motors based on IR sensor readings
     if (sstates.ir_left == SENSOR_HIGH) {
       changeMotor(LEFT_MOTOR_ENABLE_CMD);
