@@ -248,8 +248,11 @@ void ultrasonic_poll() {
     changeMotor(RIGHT_MOTOR_DISABLE_CMD);
   } else if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
     double pid_result = computePID(distance);
-    int pid_speed = 100 + 20*abs(pid_result);
+    int pid_speed = 100 + 10*abs(pid_result);
     if (pid_speed <= 255) {
+      if (pid_speed >= 140) {
+        pid_speed = 140;
+      }
       Serial.print("PID_SPEED: ");
       Serial.println(pid_speed);
       sstates.left_motor_speed = pid_speed;
@@ -344,6 +347,9 @@ void printCurrentInfo() {
 }
 
 int startStopCommandReceived() {
+  sstates.control_mode = 0;
+  sstates.reference_speed = 10;
+  return 1;
   if (client.available()) {
     //std::string command = "B:1,M:4,S:100";//client.readStringUntil('\n');
     String command_e = client.readStringUntil('\n');
