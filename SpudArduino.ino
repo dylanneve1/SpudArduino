@@ -82,6 +82,7 @@ struct sensor_states {
 };
 
 struct arduino_states {
+  bool cooldown_activated = false;
   unsigned long start_time = 0;
   unsigned long current_time = 0;
   unsigned long last_update_time = 0;
@@ -89,6 +90,7 @@ struct arduino_states {
   unsigned long last_distance_time = 0;
   unsigned long last_speed_calc_time = 0;
   unsigned long last_pid_calc_time = 0;
+  unsigned long last_cooldown_time = 0;
   bool first_distance_checked = false;
   double dist = 0;
   double last_dist = 0;
@@ -149,9 +151,15 @@ void setup() {
   astates.last_update_time = astates.start_time;
   astates.last_server_time = astates.start_time;
   astates.last_pid_calc_time = astates.start_time;
+  astates.last_cooldown_time = astates.start_time;
 }
 
 void loop() {
+  if (work == BUGGY_WORK) {
+    if (astates.cooldown_activated && astates.current_time - astates.last_cooldown_time >= 500) {
+      astates.cooldown_activated = false;
+    }
+  }
   if (work == BUGGY_WORK) {
     if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
       matrix.renderBitmap(work_obj_frame, 8, 12);
@@ -200,7 +208,7 @@ void loop() {
       astates.first_distance_checked = true;
       astates.last_distance_time = astates.current_time;
     }
-    if (sstates.control_mode == REFERENCE_SPEED_CONTROL && work == BUGGY_WORK) {
+    if (sstates.control_mode == REFERENCE_SPEED_CONTROL && work == BUGGY_WORK && !astates.cooldown_activated) {
       alignBuggySpeed();
       writeMotorSpeed();
     }
@@ -227,10 +235,18 @@ void ir_sensor_poll() {
 
 void ir_sensor_event(int event, int intensity) {
   if (event == LEVENT && intensity != sstates.ir_left) {
+    if (intensity == SENSOR_LOW && !astates.cooldown_activated) {
+      astates.cooldown_activated = true;
+      astates.last_cooldown_time = astates.current_time;
+    }
     Serial.println("sensor_event: left state changed!");
     sstates.ir_left = intensity;
     changeMotor(intensity == SENSOR_HIGH ? LEFT_MOTOR_ENABLE_CMD : LEFT_MOTOR_DISABLE_CMD);
   } else if (event == REVENT && intensity != sstates.ir_right) {
+    if (intensity == SENSOR_LOW && !astates.cooldown_activated) {
+      astates.cooldown_activated = true;
+      astates.last_cooldown_time = astates.current_time;
+    }
     Serial.println("sensor_event: right state changed!");
     sstates.ir_right = intensity;
     changeMotor(intensity == SENSOR_HIGH ? RIGHT_MOTOR_ENABLE_CMD : RIGHT_MOTOR_DISABLE_CMD);
