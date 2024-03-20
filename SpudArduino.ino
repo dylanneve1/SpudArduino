@@ -26,8 +26,8 @@
 #define REFERENCE_SPEED_CONTROL 0
 
 // PID variables
-double kp = (1/7.3);
-double ki = 1/20;
+double kp = (1 / 7.3);
+double ki = 1 / 20;
 double kd = 2;
 double elapsedTime;
 double error;
@@ -156,7 +156,7 @@ void loop() {
     if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
       matrix.renderBitmap(work_obj_frame, 8, 12);
     } else {
-      matrix.renderBitmap(work_speed_frame, 8, 12); 
+      matrix.renderBitmap(work_speed_frame, 8, 12);
     }
   } else {
     matrix.renderBitmap(off_frame, 8, 12);
@@ -249,7 +249,7 @@ void ultrasonic_poll() {
     changeMotor(RIGHT_MOTOR_DISABLE_CMD);
   } else if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
     double pid_result = computePID(distance);
-    int pid_speed = 100 + 10*abs(pid_result);
+    int pid_speed = 100 + 10 * abs(pid_result);
     if (pid_speed <= 255) {
       if (pid_speed >= 140) {
         pid_speed = 140;
@@ -352,9 +352,9 @@ void printCurrentInfo() {
 }
 
 int startStopCommandReceived() {
-//  sstates.control_mode = 0;
-//  sstates.reference_speed = 10;
-//  return 1;
+  //  sstates.control_mode = 0;
+  //  sstates.reference_speed = 10;
+  //  return 1;
   if (client.available()) {
     //std::string command = "B:1,M:4,S:100";//client.readStringUntil('\n');
     String command_e = client.readStringUntil('\n');
@@ -369,6 +369,14 @@ int startStopCommandReceived() {
     if (work == 0) {
       changeMotor(LEFT_MOTOR_DISABLE_CMD);
       changeMotor(RIGHT_MOTOR_DISABLE_CMD);
+    } else {
+      // Enable motors based on IR sensor readings
+      if (sstates.ir_left == SENSOR_HIGH) {
+        changeMotor(LEFT_MOTOR_ENABLE_CMD);
+      }
+      if (sstates.ir_right == SENSOR_HIGH) {
+        changeMotor(RIGHT_MOTOR_ENABLE_CMD);
+      }
     }
     return work;
   } else {
@@ -382,25 +390,28 @@ void alignBuggySpeed() {
   } else {
     convertedRefSpeed += 5;
   }
-  if (digitalRead(LEYE) == HIGH) {
+  if (convertedRefSpeed >= 150) {
+    convertedRefSpeed = 150;
+  }
+  if (sstates.ir_left == SENSOR_HIGH) {
     sstates.left_motor_speed = convertedRefSpeed;
   }
-  if (digitalRead(REYE) == HIGH) {
+  if (sstates.ir_right == SENSOR_HIGH) {
     sstates.right_motor_speed = convertedRefSpeed;
   }
 }
 
-double computePID(double inp) {   
-    elapsedTime = (double)(astates.current_time - astates.last_pid_calc_time); //compute time elapsed from previous computation
-    
-    error = (setPoint - inp);
-    cumError += error * elapsedTime;
-    rateError = (error - lastError)/elapsedTime;
+double computePID(double inp) {
+  elapsedTime = (double)(astates.current_time - astates.last_pid_calc_time); //compute time elapsed from previous computation
 
-    double ret = kp*error + ki*cumError + kd*rateError;         
+  error = (setPoint - inp);
+  cumError += error * elapsedTime;
+  rateError = (error - lastError) / elapsedTime;
 
-    lastError = error;
-    astates.last_pid_calc_time = astates.current_time;
-  
-    return ret;
+  double ret = kp * error + ki * cumError + kd * rateError;
+
+  lastError = error;
+  astates.last_pid_calc_time = astates.current_time;
+
+  return ret;
 }
