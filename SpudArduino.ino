@@ -1,134 +1,13 @@
-#include <WiFiS3.h>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <regex>
-#include "Arduino_LED_Matrix.h"
-#include "frames.h"
+#include "SpudArduino.h"
 
-// Timeframes
-#define SERVER_POLL_TIMEFRAME 2000
-#define US_POLL_TIMEFRAME 500
-#define SPEED_CALC_POLL_TIMEFRAME 1000
-
-// Buggy working or idle
-#define BUGGY_WORK 1
-#define BUGGY_IDLE 0
-
-// Max and min motor pwm values
-// Range is currently 40
-#define MOTOR_SPEED_MAX 120
-#define MOTOR_SPEED_BASE 80
-#define MOTOR_SPEED_NONE 0
-
-// Control modes
-#define REFERENCE_OBJECT_CONTROL 4
-#define REFERENCE_SPEED_CONTROL 0
-
-// PID variables
-double kp = (1 / 7.3);
-double ki = 1 / 20;
-double kd = 2;
-double elapsedTime;
-double error;
-double lastError;
-const double setPoint = 20;
-double cumError, rateError;
-int savedSpeed = 100;
-
-// Sensor constants
-#define SENSOR_LOW 0
-#define SENSOR_HIGH 1
-#define LEVENT 11
-#define REVENT 12
-
-// Motor commands
-#define LEFT_MOTOR_ENABLE_CMD 0
-#define RIGHT_MOTOR_ENABLE_CMD 1
-#define LEFT_MOTOR_DISABLE_CMD 2
-#define RIGHT_MOTOR_DISABLE_CMD 3
-
-// Encoder Pins
-#define L_MOTOR_ENC 3
-#define R_MOTOR_ENC 2
-
-// IR Sensor Pins
-#define LEYE 4
-#define REYE 13
-
-// Ultrasonic Pins
-#define US_TRIG 8
-#define US_ECHO 9
-
-// Motor Control Pins
-#define R_MOTOR_IN1 6
-#define R_MOTOR_IN2 5
-#define L_MOTOR_IN1 11
-#define L_MOTOR_IN2 12
-#define L_MOTOR_EN 10
-#define R_MOTOR_EN 7
-
-// Encoder wheel revolution distance
-#define REVOLUTION_DISTANCE 0.204
-
-// Data structures
-struct sensor_states {
-  int ir_left = SENSOR_LOW;
-  int ir_right = SENSOR_LOW;
-  int left_motor_speed = MOTOR_SPEED_BASE;
-  int right_motor_speed = MOTOR_SPEED_BASE;
-  int reference_speed;
-  int control_mode = REFERENCE_OBJECT_CONTROL;
-};
-
-struct arduino_states {
-  bool cooldown_activated = false;
-  unsigned long start_time = 0;
-  unsigned long current_time = 0;
-  unsigned long last_update_time = 0;
-  unsigned long last_server_time = 0;
-  unsigned long last_distance_time = 0;
-  unsigned long last_speed_calc_time = 0;
-  unsigned long last_pid_calc_time = 0;
-  unsigned long last_cooldown_time = 0;
-  bool first_distance_checked = false;
-  double dist = 0;
-  double last_dist = 0;
-  double avg_v = 0;
-};
-
-// Global variables
 sensor_states sstates;
 arduino_states astates;
 WiFiServer server(5200);
 WiFiClient client;
-ArduinoLEDMatrix matrix;
-volatile int leftRevolutions = 0;
-volatile int rightRevolutions = 0;
-int work = BUGGY_IDLE;
-bool firstPoll = true;
-int convertedRefSpeed = 100;
-
-// Function prototypes
-void setup();
-void loop();
-void LencoderISR();
-void RencoderISR();
-void ir_sensor_poll();
-void ir_sensor_event(int event, int intensity);
-void ultrasonic_poll();
-int getUltrasonicDistance();
-void changeMotor(int motor);
-double checkWheelEnc();
-double checkAvgSpeed();
-void printCurrentInfo();
-int startStopCommandReceived();
-double computePID(double inp);
 
 void setup() {
   // Initialization
   Serial.begin(9600);
-  matrix.begin();
   WiFi.beginAP("SpudArduino", "Arduino2024");
   server.begin();
   pinMode(LEYE, INPUT);
@@ -150,64 +29,42 @@ void setup() {
   astates.start_time = millis();
   astates.last_update_time = astates.start_time;
   astates.last_server_time = astates.start_time;
-  astates.last_pid_calc_time = astates.start_time;
-  astates.last_cooldown_time = astates.start_time;
 }
 
 void loop() {
-  if (work == BUGGY_WORK) {
-    if (astates.cooldown_activated && astates.current_time - astates.last_cooldown_time >= 500) {
-      astates.cooldown_activated = false;
-    }
-  }
-  if (work == BUGGY_WORK) {
-    if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
-      matrix.renderBitmap(work_obj_frame, 8, 12);
-    } else {
-      matrix.renderBitmap(work_speed_frame, 8, 12);
-    }
-  } else {
-    matrix.renderBitmap(off_frame, 8, 12);
-  }
   // Update state variables
   astates.current_time = millis();
 
   // IR sensor polling
-  if (work == BUGGY_WORK) {
+  if (astates.work == BUGGY_WORK) {
     ir_sensor_poll();
 
     // Ultrasonic sensor polling
-    if (astates.current_time - astates.last_update_time >= US_POLL_TIMEFRAME || firstPoll) {
+    if (astates.current_time - astates.last_update_time >= US_POLL_TIMEFRAME || astates.fp) {
       ultrasonic_poll();
       astates.last_update_time = astates.current_time;
-    }
-    if (firstPoll) {
-      firstPoll = false;
+      if (astates.fp) {
+        astates.fp = false;
+      }
     }
   }
 
   if (astates.current_time - astates.last_speed_calc_time >= SPEED_CALC_POLL_TIMEFRAME) {
-    // Avg speed
-    // Wheel encoder distance and avg speed calculation
     astates.dist = checkWheelEnc();
     if (!astates.first_distance_checked) {
       astates.avg_v = checkAvgSpeed();
+      astates.first_distance_checked = true;
     } else {
       astates.avg_v = astates.dist / ((astates.current_time - astates.start_time) / 1000);
-      astates.first_distance_checked = true;
       astates.last_distance_time = astates.current_time;
-    }
-    if (sstates.control_mode == REFERENCE_SPEED_CONTROL && work == BUGGY_WORK && !astates.cooldown_activated) {
-      alignBuggySpeed();
-      writeMotorSpeed();
     }
     astates.last_speed_calc_time = astates.current_time;
   }
 
   // Server communication
   if (astates.current_time - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
-    work = startStopCommandReceived();
-    if (work == BUGGY_WORK) {
+    astates.work = startStopCommandReceived();
+    if (astates.work == BUGGY_WORK) {
       Serial.print("Current distance travelled: ");
       Serial.println(astates.dist);
     } else {
@@ -222,11 +79,11 @@ void loop() {
 // *** Encoder Interrupt Service Routines (ISRs) ***
 
 void LencoderISR() {
-  leftRevolutions++;
+  sstates.leftRevolutions++;
 }
 
 void RencoderISR() {
-  rightRevolutions++;
+  sstates.rightRevolutions++;
 }
 
 // *** Sensor Functions ***
@@ -238,18 +95,10 @@ void ir_sensor_poll() {
 
 void ir_sensor_event(int event, int intensity) {
   if (event == LEVENT && intensity != sstates.ir_left) {
-    if (intensity == SENSOR_LOW && !astates.cooldown_activated) {
-      astates.cooldown_activated = true;
-      astates.last_cooldown_time = astates.current_time;
-    }
     Serial.println("sensor_event: left state changed!");
     sstates.ir_left = intensity;
     changeMotor(intensity == SENSOR_HIGH ? LEFT_MOTOR_ENABLE_CMD : LEFT_MOTOR_DISABLE_CMD);
   } else if (event == REVENT && intensity != sstates.ir_right) {
-    if (intensity == SENSOR_LOW && !astates.cooldown_activated) {
-      astates.cooldown_activated = true;
-      astates.last_cooldown_time = astates.current_time;
-    }
     Serial.println("sensor_event: right state changed!");
     sstates.ir_right = intensity;
     changeMotor(intensity == SENSOR_HIGH ? RIGHT_MOTOR_ENABLE_CMD : RIGHT_MOTOR_DISABLE_CMD);
@@ -266,22 +115,6 @@ void ultrasonic_poll() {
     Serial.println("YOU NEED TO STOP!");
     changeMotor(LEFT_MOTOR_DISABLE_CMD);
     changeMotor(RIGHT_MOTOR_DISABLE_CMD);
-  } else if (sstates.control_mode == REFERENCE_OBJECT_CONTROL) {
-    double pid_result = computePID(distance);
-    int pid_speed = 100 + 10 * abs(pid_result);
-    if (pid_speed <= 255) {
-      if (pid_speed >= 140) {
-        pid_speed = 140;
-      }
-      Serial.print("PID_SPEED: ");
-      Serial.println(pid_speed);
-      sstates.left_motor_speed = pid_speed;
-      sstates.right_motor_speed = pid_speed;
-      savedSpeed = pid_speed;
-    } else {
-      sstates.left_motor_speed = savedSpeed;
-      sstates.right_motor_speed = savedSpeed;
-    }
   } else {
     // Enable motors based on IR sensor readings
     if (sstates.ir_left == SENSOR_HIGH) {
@@ -323,21 +156,12 @@ void changeMotor(int motor) {
   }
 }
 
-void writeMotorSpeed() {
-  if (digitalRead(LEYE) == HIGH) {
-    analogWrite(L_MOTOR_EN, sstates.left_motor_speed);
-  }
-  if (digitalRead(REYE) == HIGH) {
-    analogWrite(R_MOTOR_EN, sstates.right_motor_speed);
-  }
-}
-
 // *** Wheel Encoder Functions ***
 
 double checkWheelEnc() {
-  double ret = (REVOLUTION_DISTANCE / 2) * leftRevolutions;
-  ret += (REVOLUTION_DISTANCE / 2) * rightRevolutions;
-  return ret * 0.25;  // Multiply by 0.25 to average and likely get a more accurate distance
+  double ret = (REVOLUTION_DISTANCE / 2) * sstates.leftRevolutions;
+  ret += (REVOLUTION_DISTANCE / 2) * sstates.rightRevolutions;
+  return ret * 0.25;
 }
 
 double checkAvgSpeed() {
@@ -372,21 +196,16 @@ void printCurrentInfo() {
 }
 
 int startStopCommandReceived() {
-  //  sstates.control_mode = 0;
-  //  sstates.reference_speed = 10;
-  //  return 1;
   if (client.available()) {
-    //std::string command = "B:1,M:4,S:100";//client.readStringUntil('\n');
     String command_e = client.readStringUntil('\n');
     std::string command = command_e.c_str();
-    std::regex pattern(R"(B:(\d+),M:(\d+),S:(\d+))");
+    std::regex pattern(R"(B:(\d+),S:(\d+))");
     std::smatch match;
     if (std::regex_match(command, match, pattern)) {
-      work = std::stoi(match[1]);
-      sstates.control_mode = std::stoi(match[2]);
-      sstates.reference_speed = std::stoi(match[3]);
+      astates.work = std::stoi(match[1]);
+      astates.reference_speed = std::stoi(match[2]);
     }
-    if (work == 0) {
+    if (astates.work == BUGGY_IDLE) {
       changeMotor(LEFT_MOTOR_DISABLE_CMD);
       changeMotor(RIGHT_MOTOR_DISABLE_CMD);
     } else {
@@ -398,38 +217,8 @@ int startStopCommandReceived() {
         changeMotor(RIGHT_MOTOR_ENABLE_CMD);
       }
     }
-    return work;
+    return astates.work;
   } else {
-    return work;
+    return astates.work;
   }
-}
-
-void alignBuggySpeed() {
-  if (astates.avg_v > sstates.reference_speed) {
-    convertedRefSpeed += sstates.reference_speed - astates.avg_v;
-  }
-  if (convertedRefSpeed >= 150) {
-    convertedRefSpeed = 150;
-  }
-  if (sstates.ir_left == SENSOR_HIGH) {
-    sstates.left_motor_speed = convertedRefSpeed;
-  }
-  if (sstates.ir_right == SENSOR_HIGH) {
-    sstates.right_motor_speed = convertedRefSpeed;
-  }
-}
-
-double computePID(double inp) {
-  elapsedTime = (double)(astates.current_time - astates.last_pid_calc_time); //compute time elapsed from previous computation
-
-  error = (setPoint - inp);
-  cumError += error * elapsedTime;
-  rateError = (error - lastError) / elapsedTime;
-
-  double ret = kp * error + ki * cumError + kd * rateError;
-
-  lastError = error;
-  astates.last_pid_calc_time = astates.current_time;
-
-  return ret;
 }
