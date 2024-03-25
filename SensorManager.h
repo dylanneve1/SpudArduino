@@ -6,6 +6,8 @@
 #define RIGHT_MOTOR_ENABLE  1
 #define LEFT_MOTOR_DISABLE  2
 #define RIGHT_MOTOR_DISABLE 3
+#define LEFT_MOTOR_TURN 4
+#define RIGHT_MOTOR_TURN 5
 
 // IR sensor events
 #define LEVENT 11

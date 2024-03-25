@@ -39,6 +39,7 @@ void WiFiManager::messageClient(String message) {
 
 // Function to check for start stop command
 int WiFiManager::startStopCommandReceived() {
+  return 1;
   if (client.available()) {
     String command = client.readStringUntil('\n');
 
