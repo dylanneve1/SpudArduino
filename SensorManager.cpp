@@ -87,13 +87,19 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
 // between on and off for the left
 // and right motors
 void SensorManager::changeMotor(int motor, sensor_states &sstates) {
+  if (!sstates.pidEnabled) {
+    leftSpeed = sstates.left_motor_speed;
+    rightSpeed = sstates.right_motor_speed;
+  } else {
+    //TODO: PID SPEED
+  }
   if (motor == LEFT_MOTOR_ENABLE) {
-    analogWrite(L_MOTOR_EN, MOTOR_SPEED_MAX);
+    analogWrite(L_MOTOR_EN, leftSpeed);
     digitalWrite(L_MOTOR_IN1, HIGH);
     digitalWrite(L_MOTOR_IN2, LOW);
     sstates.left_motor_speed = MOTOR_SPEED_MAX;
   } else if (motor == RIGHT_MOTOR_ENABLE) {
-    analogWrite(R_MOTOR_EN, MOTOR_SPEED_MAX);
+    analogWrite(R_MOTOR_EN, rightSpeed);
     digitalWrite(R_MOTOR_IN1, HIGH);
     digitalWrite(R_MOTOR_IN2, LOW);
     sstates.right_motor_speed = MOTOR_SPEED_MAX;

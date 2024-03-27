@@ -54,8 +54,8 @@
 struct sensor_states {
   int ir_left = SENSOR_LOW;
   int ir_right = SENSOR_LOW;
-  int left_motor_speed = 0;
-  int right_motor_speed = 0;
+  int left_motor_speed = MOTOR_SPEED_MAX;
+  int right_motor_speed = MOTOR_SPEED_MAX;
   bool firstPoll = true;
   int pidCoef;
   bool pidEnabled = false;
