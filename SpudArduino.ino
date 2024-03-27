@@ -36,6 +36,7 @@ void setup() {
   astates.last_server_time = millis();
   astates.last_distance_time = millis();
   astates.last_speed_calc_time = millis();
+  astates.last_pid_calc_time = millis();
   // Begin serial connection
   Serial.begin(9600);
   // Setup pins

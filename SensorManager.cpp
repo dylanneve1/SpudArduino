@@ -27,7 +27,7 @@ void SensorManager::probe(int work, sensor_states &sstates, arduino_states &asta
   if (work == BUGGY_WORK) {
     ir_sensor_poll(sstates);
     if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || sstates.firstPoll) {
-      ultrasonic_poll(work, sstates);
+      ultrasonic_poll(work, sstates, astates);
       astates.last_update_time = millis();
       if (sstates.firstPoll) {
         sstates.firstPoll = false;
@@ -122,7 +122,7 @@ void SensorManager::changeMotor(int motor, sensor_states &sstates) {
   }
 }
 
-void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
+void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_states &astates) {
   // Probe devices passing them states
   // incase changes have occurred
   // Check distance with ultrasonic sensor
@@ -137,6 +137,11 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
       changeMotor(LEFT_MOTOR_DISABLE, sstates);
       changeMotor(RIGHT_MOTOR_DISABLE, sstates);
       return;
+    } else if (distance < 75.0) {
+      sstates.pidCoef = computePID(distance, astates);
+      sstates.pidEnabled = true;
+    } else {
+      sstates.pidEnabled = false;
     }
     if (sstates.ir_left == SENSOR_HIGH) {
       changeMotor(LEFT_MOTOR_ENABLE, sstates);
@@ -146,7 +151,6 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
     }
   }
 }
-
 
 // Function to get ultrasonic distance
 int SensorManager::getUltrasonicDistance() {
@@ -164,5 +168,20 @@ double SensorManager::checkWheelEnc(volatile int leftRevolutions, volatile int r
   ret = (REVOLUTION_DISTANCE / 2) * leftRevolutions;
   ret += (REVOLUTION_DISTANCE / 2) * rightRevolutions;
   ret = ret * 0.25;
+  return ret;
+}
+
+double SensorManager::computePID(double inp, arduino_states &astates) {
+  elapsedTime = (double)(astates.current_time - astates.last_pid_calc_time);
+
+  error = (setPoint - inp);
+  cumError += error * elapsedTime;
+  rateError = (error - lastError) / elapsedTime;
+
+  double ret = kp * error + ki * cumError + kd * rateError;
+
+  lastError = error;
+  astates.last_pid_calc_time = astates.current_time;
+
   return ret;
 }

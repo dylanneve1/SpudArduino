@@ -23,6 +23,7 @@ struct arduino_states {
   unsigned long last_server_time;
   unsigned long last_distance_time;
   unsigned long last_speed_calc_time;
+  unsigned long last_pid_calc_time;
   bool first_distance_checked = false;
   double dist, last_dist, avg_v;
 };
