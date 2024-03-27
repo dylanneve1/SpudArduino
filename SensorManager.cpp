@@ -87,44 +87,42 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
 // between on and off for the left
 // and right motors
 void SensorManager::changeMotor(int motor, sensor_states &sstates) {
+  int leftSpeed, rightSpeed;
   if (!sstates.pidEnabled) {
     leftSpeed = sstates.left_motor_speed;
     rightSpeed = sstates.right_motor_speed;
   } else {
-    //TODO: PID SPEED
+    leftSpeed = 80 + (sstates.pidCoef^4);
+    rightSpeed = 80 + (sstates.pidCoef^4);
   }
+  Serial.print("leftSpeed: ");
+  Serial.println(leftSpeed);
+  Serial.print("rightSpeed: ");
+  Serial.println(rightSpeed);
   if (motor == LEFT_MOTOR_ENABLE) {
     analogWrite(L_MOTOR_EN, leftSpeed);
     digitalWrite(L_MOTOR_IN1, HIGH);
     digitalWrite(L_MOTOR_IN2, LOW);
-    sstates.left_motor_speed = MOTOR_SPEED_MAX;
   } else if (motor == RIGHT_MOTOR_ENABLE) {
     analogWrite(R_MOTOR_EN, rightSpeed);
     digitalWrite(R_MOTOR_IN1, HIGH);
     digitalWrite(R_MOTOR_IN2, LOW);
-    sstates.right_motor_speed = MOTOR_SPEED_MAX;
   } else if (motor == LEFT_MOTOR_DISABLE) {
     analogWrite(L_MOTOR_EN, MOTOR_SPEED_MIN);
     digitalWrite(L_MOTOR_IN1, LOW);
     digitalWrite(L_MOTOR_IN2, LOW);
-    sstates.left_motor_speed = MOTOR_SPEED_MIN;
   } else if (motor == RIGHT_MOTOR_DISABLE) {
     analogWrite(R_MOTOR_EN, MOTOR_SPEED_MIN);
     digitalWrite(R_MOTOR_IN1, LOW);
     digitalWrite(R_MOTOR_IN2, LOW);
-    sstates.right_motor_speed = MOTOR_SPEED_MIN;
   } else if (motor == LEFT_MOTOR_TURN) {
     analogWrite(L_MOTOR_EN, MOTOR_SPEED_TURN);
     digitalWrite(L_MOTOR_IN1, LOW);
     digitalWrite(L_MOTOR_IN2, HIGH);
-    sstates.left_motor_speed = MOTOR_SPEED_TURN;
-    sstates.right_motor_speed = MOTOR_SPEED_MAX;
   } else if (motor == RIGHT_MOTOR_TURN) {
     analogWrite(R_MOTOR_EN, MOTOR_SPEED_TURN);
     digitalWrite(R_MOTOR_IN1, LOW);
     digitalWrite(R_MOTOR_IN2, HIGH);
-    sstates.left_motor_speed = MOTOR_SPEED_MAX;
-    sstates.right_motor_speed = MOTOR_SPEED_TURN;
   }
 }
 
