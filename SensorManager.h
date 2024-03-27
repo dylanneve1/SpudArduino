@@ -1,6 +1,8 @@
 #ifndef SENSOR_MANAGER_H
 #define SENSOR_MANAGER_H
 
+#include "SpudArduino.h"
+
 // Right and left motor macros
 #define LEFT_MOTOR_ENABLE   0
 #define RIGHT_MOTOR_ENABLE  1
@@ -54,13 +56,14 @@ struct sensor_states {
   int ir_right = SENSOR_LOW;
   int left_motor_speed = 0;
   int right_motor_speed = 0;
+  bool firstPoll = true;
 };
 
 // SensorManager class
 class SensorManager {
 
   public:
-    void probe(int work, sensor_states &sstates);
+    void probe(int work, sensor_states &sstates, arduino_states &astates);
     void pinSetup();
     void ultrasonic_poll(int work, sensor_states &sstates);
     int getUltrasonicDistance();

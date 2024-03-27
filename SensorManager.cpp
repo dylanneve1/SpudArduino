@@ -23,9 +23,16 @@ void SensorManager::pinSetup() {
 // Entry point for SensorManager class
 // polls each sensor and performs any
 // necessary updates to the data structs
-void SensorManager::probe(int work, sensor_states &sstates) {
+void SensorManager::probe(int work, sensor_states &sstates, arduino_states &astates) {
   if (work == BUGGY_WORK) {
     ir_sensor_poll(sstates);
+    if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || sstates.firstPoll) {
+      ultrasonic_poll(work, sstates);
+      astates.last_update_time = millis();
+      if (sstates.firstPoll) {
+        sstates.firstPoll = false;
+      }
+    }
   }
 }
 
@@ -72,7 +79,6 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
         changeMotor(RIGHT_MOTOR_TURN, sstates);
         Serial.println("Right motor disabled!");
       }
-
     }
   }
 }

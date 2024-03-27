@@ -64,19 +64,10 @@ void loop() {
     sensors.changeMotor(LEFT_MOTOR_DISABLE, sstates);
     sensors.changeMotor(RIGHT_MOTOR_DISABLE, sstates);
   }
-
   // Set the current time before starting loop
   astates.current_time = millis();
   // Sensors
-  sensors.probe(work, sstates);
-  if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || firstPoll) {
-    sensors.ultrasonic_poll(work, sstates);
-    astates.last_update_time = millis();
-  }
-  if (firstPoll) {
-    firstPoll = false;
-    Serial.println("Sneaky first poll completed!");
-  }
+  sensors.probe(work, sstates, astates);
   if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
     // Print current information
     printCurrentInfo();
