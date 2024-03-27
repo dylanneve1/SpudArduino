@@ -103,14 +103,14 @@ void SensorManager::changeMotor(int motor, sensor_states &sstates) {
     sstates.right_motor_speed = MOTOR_SPEED_MIN;
   } else if (motor == LEFT_MOTOR_TURN) {
     analogWrite(L_MOTOR_EN, MOTOR_SPEED_TURN);
-    digitalWrite(L_MOTOR_IN1, HIGH);
-    digitalWrite(L_MOTOR_IN2, LOW);
+    digitalWrite(L_MOTOR_IN1, LOW);
+    digitalWrite(L_MOTOR_IN2, HIGH);
     sstates.left_motor_speed = MOTOR_SPEED_TURN;
     sstates.right_motor_speed = MOTOR_SPEED_MAX;
   } else if (motor == RIGHT_MOTOR_TURN) {
     analogWrite(R_MOTOR_EN, MOTOR_SPEED_TURN);
-    digitalWrite(R_MOTOR_IN1, HIGH);
-    digitalWrite(R_MOTOR_IN2, LOW);
+    digitalWrite(R_MOTOR_IN1, LOW);
+    digitalWrite(R_MOTOR_IN2, HIGH);
     sstates.left_motor_speed = MOTOR_SPEED_MAX;
     sstates.right_motor_speed = MOTOR_SPEED_TURN;
   }
