@@ -73,6 +73,7 @@ public:
   double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
 
 private:
+  void alignBuggySpeed(sensor_states &sstates, arduino_states &astates);
   double computePID(double inp, arduino_states &astates);
   void ir_sensor_poll(sensor_states &sstates);
   void ir_sensor_event(int event, int intensity, sensor_states &sstates);

@@ -185,3 +185,18 @@ double SensorManager::computePID(double inp, arduino_states &astates) {
 
   return ret;
 }
+
+void SensorManager::alignBuggySpeed(sensor_states &sstates, arduino_states &astates) {
+  // if (astates.avg_v > sstates.reference_speed) {
+  //   convertedRefSpeed += sstates.reference_speed - astates.avg_v;
+  // }
+  // if (convertedRefSpeed >= 150) {
+  //   convertedRefSpeed = 150;
+  // }
+  // if (sstates.ir_left == SENSOR_HIGH) {
+  //   sstates.left_motor_speed = convertedRefSpeed;
+  // }
+  // if (sstates.ir_right == SENSOR_HIGH) {
+  //   sstates.right_motor_speed = convertedRefSpeed;
+  // }
+}
