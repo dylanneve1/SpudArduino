@@ -47,8 +47,8 @@ void setup() {
   wifi.setupAP();
   wifi.setupServer();
   // Setup interrupts for encoders
-  attachInterrupt(digitalPinToInterrupt(L_MOTOR_ENC), LencoderISR, RISING); 
-  attachInterrupt(digitalPinToInterrupt(R_MOTOR_ENC), RencoderISR, RISING); 
+  attachInterrupt(digitalPinToInterrupt(L_MOTOR_ENC), LencoderISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(R_MOTOR_ENC), RencoderISR, RISING);
 }
 
 // Main loop
@@ -65,7 +65,7 @@ void loop() {
     sensors.changeMotor(LEFT_MOTOR_DISABLE, sstates);
     sensors.changeMotor(RIGHT_MOTOR_DISABLE, sstates);
   }
-  
+
   // Set the current time before starting loop
   astates.current_time = millis();
   // Sensors

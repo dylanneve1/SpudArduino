@@ -56,7 +56,7 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
       if (intensity == SENSOR_HIGH) {
         changeMotor(LEFT_MOTOR_ENABLE, sstates);
         Serial.println("Left motor enabled!");
-      } else if (intensity== SENSOR_LOW) {
+      } else if (intensity == SENSOR_LOW) {
         changeMotor(LEFT_MOTOR_TURN, sstates);
         Serial.println("Left motor disabled!");
       }
@@ -68,11 +68,11 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
       if (intensity == SENSOR_HIGH) {
         changeMotor(RIGHT_MOTOR_ENABLE, sstates);
         Serial.println("Right motor enabled!");
-      } else if (intensity==SENSOR_LOW) {
+      } else if (intensity == SENSOR_LOW) {
         changeMotor(RIGHT_MOTOR_TURN, sstates);
         Serial.println("Right motor disabled!");
       }
-  
+
     }
   }
 }
@@ -101,22 +101,19 @@ void SensorManager::changeMotor(int motor, sensor_states &sstates) {
     digitalWrite(R_MOTOR_IN1, LOW);
     digitalWrite(R_MOTOR_IN2, LOW);
     sstates.right_motor_speed = MOTOR_SPEED_MIN;
-  }
-  else if (motor== LEFT_MOTOR_TURN)
-  {analogWrite(L_MOTOR_EN, MOTOR_SPEED_TURN);
-  digitalWrite(L_MOTOR_IN1, HIGH);
-  digitalWrite(L_MOTOR_IN2, LOW);
-  sstates.left_motor_speed= MOTOR_SPEED_TURN;
-  sstates.right_motor_speed= MOTOR_SPEED_MAX;}
-  else if (motor== RIGHT_MOTOR_TURN)
-  {
+  } else if (motor == LEFT_MOTOR_TURN) {
+    analogWrite(L_MOTOR_EN, MOTOR_SPEED_TURN);
+    digitalWrite(L_MOTOR_IN1, HIGH);
+    digitalWrite(L_MOTOR_IN2, LOW);
+    sstates.left_motor_speed = MOTOR_SPEED_TURN;
+    sstates.right_motor_speed = MOTOR_SPEED_MAX;
+  } else if (motor == RIGHT_MOTOR_TURN) {
     analogWrite(R_MOTOR_EN, MOTOR_SPEED_TURN);
     digitalWrite(R_MOTOR_IN1, HIGH);
     digitalWrite(R_MOTOR_IN2, LOW);
-    sstates.left_motor_speed= MOTOR_SPEED_MAX;
-    sstates.right_motor_speed= MOTOR_SPEED_TURN;
+    sstates.left_motor_speed = MOTOR_SPEED_MAX;
+    sstates.right_motor_speed = MOTOR_SPEED_TURN;
   }
-
 }
 
 void SensorManager::ultrasonic_poll(int work, sensor_states &sstates) {
@@ -158,8 +155,8 @@ int SensorManager::getUltrasonicDistance() {
 
 double SensorManager::checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions) {
   double ret = 0;
-  ret = (REVOLUTION_DISTANCE/2) * leftRevolutions;
-  ret += (REVOLUTION_DISTANCE/2) * rightRevolutions;
+  ret = (REVOLUTION_DISTANCE / 2) * leftRevolutions;
+  ret += (REVOLUTION_DISTANCE / 2) * rightRevolutions;
   ret = ret * 0.25;
   return ret;
 }

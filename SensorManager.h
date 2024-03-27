@@ -59,17 +59,17 @@ struct sensor_states {
 // SensorManager class
 class SensorManager {
 
-public:
-  void probe(int work, sensor_states &sstates);
-  void pinSetup();
-  void ultrasonic_poll(int work, sensor_states &sstates);
-  int getUltrasonicDistance();
-  void changeMotor(int motor, sensor_states &sstates);
-  double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
+  public:
+    void probe(int work, sensor_states &sstates);
+    void pinSetup();
+    void ultrasonic_poll(int work, sensor_states &sstates);
+    int getUltrasonicDistance();
+    void changeMotor(int motor, sensor_states &sstates);
+    double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
 
-private:
-  void ir_sensor_poll(sensor_states &sstates);
-  void ir_sensor_event(int event, int intensity, sensor_states &sstates);
+  private:
+    void ir_sensor_poll(sensor_states &sstates);
+    void ir_sensor_event(int event, int intensity, sensor_states &sstates);
 };
 
 #endif

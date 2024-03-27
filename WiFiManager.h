@@ -8,17 +8,17 @@
 #include "SensorManager.h"
 
 class WiFiManager {
-public:
-  WiFiManager();  // Constructor
-  void setupAP();
-  void setupServer();
-  void messageClient(String message);
-  int startStopCommandReceived();
-private:
-  WiFiServer server;
-  WiFiClient client;
-  bool startStopCommand;
-  bool lastOne = false;
+  public:
+    WiFiManager();  // Constructor
+    void setupAP();
+    void setupServer();
+    void messageClient(String message);
+    int startStopCommandReceived();
+  private:
+    WiFiServer server;
+    WiFiClient client;
+    bool startStopCommand;
+    bool lastOne = false;
 };
 
 #endif
