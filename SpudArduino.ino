@@ -85,7 +85,10 @@ void loop() {
   }
   if (millis() - astates.last_speed_calc_time >= 1000) {
     if (astates.first_distance_checked) {
-      astates.avg_v = checkAvgSpeed();
+      double ret = checkAvgSpeed();
+      if (ret != NULL && ret > 0) {
+        astates.avg_v = ret;
+      }
     } else {
       astates.avg_v = astates.dist / ((astates.current_time - astates.start_time) / 1000);
       astates.last_distance_time = astates.current_time;
