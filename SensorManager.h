@@ -4,9 +4,9 @@
 #include "SpudArduino.h"
 
 // Right and left motor macros
-#define LEFT_MOTOR_ENABLE   0
-#define RIGHT_MOTOR_ENABLE  1
-#define LEFT_MOTOR_DISABLE  2
+#define LEFT_MOTOR_ENABLE 0
+#define RIGHT_MOTOR_ENABLE 1
+#define LEFT_MOTOR_DISABLE 2
 #define RIGHT_MOTOR_DISABLE 3
 #define LEFT_MOTOR_TURN 4
 #define RIGHT_MOTOR_TURN 5
@@ -57,22 +57,33 @@ struct sensor_states {
   int left_motor_speed = 0;
   int right_motor_speed = 0;
   bool firstPoll = true;
+  int pidCoef;
+  bool pidEnabled = false;
 };
 
 // SensorManager class
 class SensorManager {
 
-  public:
-    void probe(int work, sensor_states &sstates, arduino_states &astates);
-    void pinSetup();
-    void ultrasonic_poll(int work, sensor_states &sstates);
-    int getUltrasonicDistance();
-    void changeMotor(int motor, sensor_states &sstates);
-    double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
+public:
+  void probe(int work, sensor_states &sstates, arduino_states &astates);
+  void pinSetup();
+  void ultrasonic_poll(int work, sensor_states &sstates, arduino_states &astates);
+  int getUltrasonicDistance();
+  void changeMotor(int motor, sensor_states &sstates);
+  double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
 
-  private:
-    void ir_sensor_poll(sensor_states &sstates);
-    void ir_sensor_event(int event, int intensity, sensor_states &sstates);
+private:
+  double computePID(double inp, arduino_states &astates);
+  void ir_sensor_poll(sensor_states &sstates);
+  void ir_sensor_event(int event, int intensity, sensor_states &sstates);
+  double kp = (1 / 7.3);
+  double ki = 1 / 20;
+  double kd = 2;
+  double elapsedTime;
+  double error;
+  double lastError;
+  const double setPoint = 20;
+  double cumError, rateError;
 };
 
 #endif
