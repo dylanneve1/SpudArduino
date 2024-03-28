@@ -194,6 +194,28 @@ double SensorManager::computePID(double inp, arduino_states &astates) {
   return ret;
 }
 
+void SensorManager::calculateBuggySpeed(sensor_states &sstates, arduino_states &astates) {
+  if (millis() - astates.last_speed_calc_time >= 1000) {
+    if (astates.first_distance_checked) {
+      double delta_dist = astates.dist - astates.last_dist;
+      unsigned int delta_time = astates.current_time - astates.last_distance_time;
+      delta_time = delta_time / 1000;
+      double calculation = delta_dist / delta_time;
+      astates.last_dist = astates.dist;
+      astates.last_distance_time = astates.current_time;
+      calculation *= 100;
+      if (calculation != NULL && calculation > 0) {
+        astates.avg_v = calculation;
+      }
+    } else {
+      astates.avg_v = astates.dist / ((astates.current_time - astates.start_time) / 1000);
+      astates.last_distance_time = astates.current_time;
+      astates.first_distance_checked = true;
+    }
+    astates.last_speed_calc_time = astates.current_time;
+  }
+}
+
 void SensorManager::alignBuggySpeed(sensor_states &sstates, arduino_states &astates) {
   // if (astates.avg_v > sstates.reference_speed) {
   //   convertedRefSpeed += sstates.reference_speed - astates.avg_v;

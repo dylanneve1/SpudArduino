@@ -72,6 +72,7 @@ public:
   int getUltrasonicDistance();
   void changeMotor(int motor, sensor_states &sstates);
   double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
+  void calculateBuggySpeed(sensor_states &sstates, arduino_states &astates);
 
 private:
   void alignBuggySpeed(sensor_states &sstates, arduino_states &astates);
