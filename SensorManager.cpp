@@ -92,13 +92,15 @@ void SensorManager::changeMotor(int motor, sensor_states &sstates) {
     leftSpeed = sstates.left_motor_speed;
     rightSpeed = sstates.right_motor_speed;
   } else {
-    leftSpeed = 80 + (sstates.pidCoef^4);
-    rightSpeed = 80 + (sstates.pidCoef^4);
+    leftSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef*PID_MULTIPLE);
+    rightSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef*PID_MULTIPLE);
   }
   Serial.print("leftSpeed: ");
   Serial.println(leftSpeed);
   Serial.print("rightSpeed: ");
   Serial.println(rightSpeed);
+  Serial.print("pidCoef: ");
+  Serial.println(sstates.pidCoef);
   if (motor == LEFT_MOTOR_ENABLE) {
     analogWrite(L_MOTOR_EN, leftSpeed);
     digitalWrite(L_MOTOR_IN1, HIGH);

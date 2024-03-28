@@ -12,6 +12,9 @@
 #define MOTOR_SPEED_MAX 150
 #define MOTOR_SPEED_MIN 0
 #define MOTOR_SPEED_TURN 70
+#define MOTOR_SPEED_PID 100
+
+#define PID_MULTIPLE 12
 
 void encoderISR();
 
