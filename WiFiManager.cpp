@@ -45,6 +45,8 @@ void WiFiManager::messageClient(String message) {
 
 // Function to check for start stop command
 int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
+  sstates.reference_speed = 20;
+  return 1;
   int work;
   if (WIFI_ENABLED == 0) {
     return 1; 
@@ -52,7 +54,7 @@ int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
   if (client.available()) {
     String command_e = client.readStringUntil('\n');
     std::string command = command_e.c_str();
-    std::regex pattern("(B:(\d+),S:(\d+))");
+    std::regex pattern(R"(B:(\d+),S:(\d+))");
     std::smatch match;
     if (std::regex_match(command, match, pattern)) {
       work = (int)std::stoi(match[1]);

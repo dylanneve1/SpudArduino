@@ -57,8 +57,8 @@ void loop() {
   // will audiomatically do that
   work = wifi.startStopCommandReceived(sstates);
   if (work != BUGGY_WORK) {
-    sensors.changeMotor(LEFT_MOTOR_DISABLE, sstates);
-    sensors.changeMotor(RIGHT_MOTOR_DISABLE, sstates);
+    sensors.changeMotor(LEFT_MOTOR_DISABLE, sstates, astates);
+    sensors.changeMotor(RIGHT_MOTOR_DISABLE, sstates, astates);
   }
   // Set the current time before starting loop
   astates.current_time = millis();

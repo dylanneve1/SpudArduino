@@ -71,15 +71,15 @@ public:
   void pinSetup();
   void ultrasonic_poll(int work, sensor_states &sstates, arduino_states &astates);
   int getUltrasonicDistance();
-  void changeMotor(int motor, sensor_states &sstates);
+  void changeMotor(int motor, sensor_states &sstates, arduino_states &astates);
   double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
   void calculateBuggySpeed(sensor_states &sstates, arduino_states &astates);
 
 private:
   void alignBuggySpeed(sensor_states &sstates, arduino_states &astates);
   double computePID(double inp, arduino_states &astates);
-  void ir_sensor_poll(sensor_states &sstates);
-  void ir_sensor_event(int event, int intensity, sensor_states &sstates);
+  void ir_sensor_poll(sensor_states &sstates, arduino_states &astates);
+  void ir_sensor_event(int event, int intensity, sensor_states &sstates, arduino_states &astates);
   double kp = (1 / 7.3);
   double ki = 1 / 20;
   double kd = 2;

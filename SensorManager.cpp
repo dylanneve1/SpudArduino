@@ -25,7 +25,7 @@ void SensorManager::pinSetup() {
 // necessary updates to the data structs
 void SensorManager::probe(int work, sensor_states &sstates, arduino_states &astates) {
   if (work == BUGGY_WORK) {
-    ir_sensor_poll(sstates);
+    ir_sensor_poll(sstates, astates);
     if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || sstates.firstPoll) {
       ultrasonic_poll(work, sstates, astates);
       astates.last_update_time = millis();
@@ -36,21 +36,21 @@ void SensorManager::probe(int work, sensor_states &sstates, arduino_states &asta
   }
 }
 
-void SensorManager::ir_sensor_poll(sensor_states &sstates) {
+void SensorManager::ir_sensor_poll(sensor_states &sstates, arduino_states &astates) {
   if (digitalRead(LEYE) != HIGH) {
-    ir_sensor_event(LEVENT, SENSOR_LOW, sstates);
+    ir_sensor_event(LEVENT, SENSOR_LOW, sstates, astates);
   } else {
-    ir_sensor_event(LEVENT, SENSOR_HIGH, sstates);
+    ir_sensor_event(LEVENT, SENSOR_HIGH, sstates, astates);
   }
   if (digitalRead(REYE) != HIGH) {
-    ir_sensor_event(REVENT, SENSOR_LOW, sstates);
+    ir_sensor_event(REVENT, SENSOR_LOW, sstates, astates);
   } else {
-    ir_sensor_event(REVENT, SENSOR_HIGH, sstates);
+    ir_sensor_event(REVENT, SENSOR_HIGH, sstates, astates);
   }
 }
 
 // IR Sensor Event
-void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sstates) {
+void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sstates, arduino_states &astates) {
   // Check if Left or Right IR Sensor
   // If intensity is different from
   // the current sensor states then
@@ -61,10 +61,10 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
       Serial.println("sensor_event: left state changed!");
       sstates.ir_left = intensity;
       if (intensity == SENSOR_HIGH) {
-        changeMotor(LEFT_MOTOR_ENABLE, sstates);
+        changeMotor(LEFT_MOTOR_ENABLE, sstates, astates);
         Serial.println("Left motor enabled!");
       } else if (intensity == SENSOR_LOW) {
-        changeMotor(LEFT_MOTOR_TURN, sstates);
+        changeMotor(LEFT_MOTOR_TURN, sstates, astates);
         Serial.println("Left motor disabled!");
       }
     }
@@ -73,10 +73,10 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
       Serial.println("sensor_event: right state changed!");
       sstates.ir_right = intensity;
       if (intensity == SENSOR_HIGH) {
-        changeMotor(RIGHT_MOTOR_ENABLE, sstates);
+        changeMotor(RIGHT_MOTOR_ENABLE, sstates, astates);
         Serial.println("Right motor enabled!");
       } else if (intensity == SENSOR_LOW) {
-        changeMotor(RIGHT_MOTOR_TURN, sstates);
+        changeMotor(RIGHT_MOTOR_TURN, sstates, astates);
         Serial.println("Right motor disabled!");
       }
     }
@@ -86,9 +86,10 @@ void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sst
 // Function to change motor states
 // between on and off for the left
 // and right motors
-void SensorManager::changeMotor(int motor, sensor_states &sstates) {
+void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_states &astates) {
   int leftSpeed, rightSpeed;
   if (!sstates.pidEnabled) {
+    alignBuggySpeed(sstates, astates);
     leftSpeed = sstates.left_motor_speed;
     rightSpeed = sstates.right_motor_speed;
   } else {
@@ -142,8 +143,8 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
       Serial.print(distance);
       Serial.println(" cm");
       Serial.println("YOU NEED TO STOP!");
-      changeMotor(LEFT_MOTOR_DISABLE, sstates);
-      changeMotor(RIGHT_MOTOR_DISABLE, sstates);
+      changeMotor(LEFT_MOTOR_DISABLE, sstates, astates);
+      changeMotor(RIGHT_MOTOR_DISABLE, sstates, astates);
       return;
     } 
     else if (distance < 75.0) {
@@ -153,10 +154,10 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
       sstates.pidEnabled = false;
     }
     if (sstates.ir_left == SENSOR_HIGH) {
-      changeMotor(LEFT_MOTOR_ENABLE, sstates);
+      changeMotor(LEFT_MOTOR_ENABLE, sstates, astates);
     }
     if (sstates.ir_right == SENSOR_HIGH) {
-      changeMotor(RIGHT_MOTOR_ENABLE, sstates);
+      changeMotor(RIGHT_MOTOR_ENABLE, sstates, astates);
     }
   }
 }
