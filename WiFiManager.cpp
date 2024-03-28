@@ -9,7 +9,7 @@ WiFiManager::WiFiManager()
 }
 
 // Function to setup Arduino access point
-void WiFiManager::setupAP() {
+void WiFiManager::setupWiFi() {
   char ssid[] = "SpudArduino";
   char pass[] = "Arduino2024";
 
@@ -19,10 +19,7 @@ void WiFiManager::setupAP() {
 
   Serial.print("IP Address: ");
   Serial.println(ip);
-}
-
-// Setup the server connection
-void WiFiManager::setupServer() {
+  
   server.begin();
 }
 

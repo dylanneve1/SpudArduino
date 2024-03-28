@@ -44,8 +44,7 @@ void setup() {
   // Wireless Setup
   // - Setup access point
   // - Connect server
-  wifi.setupAP();
-  wifi.setupServer();
+  wifi.setupWiFi();
   // Setup interrupts for encoders
   attachInterrupt(digitalPinToInterrupt(L_MOTOR_ENC), LencoderISR, RISING);
   attachInterrupt(digitalPinToInterrupt(R_MOTOR_ENC), RencoderISR, RISING);

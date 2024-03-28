@@ -10,8 +10,7 @@
 class WiFiManager {
   public:
     WiFiManager();  // Constructor
-    void setupAP();
-    void setupServer();
+    void setupWiFi();
     void messageClient(String message);
     int startStopCommandReceived();
   private:
