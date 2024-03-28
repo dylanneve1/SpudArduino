@@ -135,6 +135,8 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
   if (work == BUGGY_WORK) {
     int distance = getUltrasonicDistance();
 
+    sstates.usdist = distance;
+
     if (distance < 20.0) {
       Serial.print("Distance detected: ");
       Serial.print(distance);

@@ -59,6 +59,7 @@ struct sensor_states {
   bool firstPoll = true;
   int pidCoef;
   bool pidEnabled = false;
+  int usdist;
 };
 
 // SensorManager class

@@ -11,12 +11,6 @@ WiFiManager wifi;
 sensor_states sstates;
 arduino_states astates;
 
-// Flag to control the motors
-bool motorsEnabled = false;
-
-// Check if US has been polled
-bool firstPoll = true;
-
 // Current state of buggy
 // work == BUGGY_IDLE means off
 // work == BUGGY_WORK means on
@@ -68,12 +62,7 @@ void loop() {
   astates.current_time = millis();
   // Sensors
   sensors.probe(work, sstates, astates);
-  if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
-    // Print current information
-    printCurrentInfo();
-    // Check for start/stop command from Processing
-    astates.last_server_time = millis();
-  }
+  wifi.probe(astates, sstates);
   if (millis() - astates.last_speed_calc_time >= 1000) {
     if (astates.first_distance_checked) {
       double ret = checkAvgSpeed();
@@ -95,18 +84,6 @@ void LencoderISR() {
 
 void RencoderISR() {
   rightRevolutions++;
-}
-
-void printCurrentInfo() {
-  String data = "L:";
-  data += sstates.left_motor_speed;
-  data += ",R:";
-  data += sstates.right_motor_speed;
-  data += ",D:";
-  data += String(sensors.getUltrasonicDistance());
-  data += ",T:";
-  data += astates.dist;
-  wifi.messageClient(data);
 }
 
 double checkAvgSpeed() {

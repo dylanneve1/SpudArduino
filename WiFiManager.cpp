@@ -19,8 +19,17 @@ void WiFiManager::setupWiFi() {
 
   Serial.print("IP Address: ");
   Serial.println(ip);
-  
+
   server.begin();
+}
+
+void WiFiManager::probe(arduino_states &astates, sensor_states &sstates) {
+  if (millis() - astates.last_server_time >= SERVER_POLL_TIMEFRAME) {
+    // Print current information
+    printCurrentInfo(astates, sstates);
+    // Check for start/stop command from Processing
+    astates.last_server_time = millis();
+  }
 }
 
 // Check that client is avaliable
@@ -57,4 +66,16 @@ int WiFiManager::startStopCommandReceived() {
   } else {
     return 0;
   }
+}
+
+void WiFiManager::printCurrentInfo(arduino_states &astates, sensor_states &sstates) {
+  String data = "L:";
+  data += sstates.left_motor_speed;
+  data += ",R:";
+  data += sstates.right_motor_speed;
+  data += ",D:";
+  data += String(sstates.usdist);
+  data += ",T:";
+  data += astates.dist;
+  messageClient(data);
 }
