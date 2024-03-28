@@ -55,7 +55,7 @@ void loop() {
   // disable the motors, we don't need
   // to re-enable them because the SensorManager
   // will audiomatically do that
-  work = wifi.startStopCommandReceived();
+  work = wifi.startStopCommandReceived(sstates);
   if (work != BUGGY_WORK) {
     sensors.changeMotor(LEFT_MOTOR_DISABLE, sstates);
     sensors.changeMotor(RIGHT_MOTOR_DISABLE, sstates);

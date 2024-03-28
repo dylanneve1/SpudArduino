@@ -145,7 +145,8 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
       changeMotor(LEFT_MOTOR_DISABLE, sstates);
       changeMotor(RIGHT_MOTOR_DISABLE, sstates);
       return;
-    } else if (distance < 75.0) {
+    } 
+    else if (distance < 75.0) {
       sstates.pidCoef = computePID(distance, astates);
       sstates.pidEnabled = true;
     } else {
@@ -217,16 +218,17 @@ void SensorManager::calculateBuggySpeed(sensor_states &sstates, arduino_states &
 }
 
 void SensorManager::alignBuggySpeed(sensor_states &sstates, arduino_states &astates) {
-  // if (astates.avg_v > sstates.reference_speed) {
-  //   convertedRefSpeed += sstates.reference_speed - astates.avg_v;
-  // }
-  // if (convertedRefSpeed >= 150) {
-  //   convertedRefSpeed = 150;
-  // }
-  // if (sstates.ir_left == SENSOR_HIGH) {
-  //   sstates.left_motor_speed = convertedRefSpeed;
-  // }
-  // if (sstates.ir_right == SENSOR_HIGH) {
-  //   sstates.right_motor_speed = convertedRefSpeed;
-  // }
+  int convertedRefSpeed;
+   if (astates.avg_v > sstates.reference_speed) {
+    convertedRefSpeed += sstates.reference_speed - astates.avg_v;
+   }
+   if (convertedRefSpeed >= 150) {
+    convertedRefSpeed = 150;
+   }
+   if (sstates.ir_left == SENSOR_HIGH) {
+     sstates.left_motor_speed = convertedRefSpeed;
+   }
+   if (sstates.ir_right == SENSOR_HIGH) {
+     sstates.right_motor_speed = convertedRefSpeed;
+   }
 }

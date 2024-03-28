@@ -36,7 +36,7 @@ void WiFiManager::probe(arduino_states &astates, sensor_states &sstates) {
 // and format message to using c_str()
 void WiFiManager::messageClient(String message) {
   client = server.available();
-  const char* message_formatted = message.c_str();
+  const char *message_formatted = message.c_str();
   if (client.connected()) {
     client.write(message_formatted);
     client.write("\n");
@@ -44,18 +44,25 @@ void WiFiManager::messageClient(String message) {
 }
 
 // Function to check for start stop command
-int WiFiManager::startStopCommandReceived() {
+int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
+  int work;
   if (WIFI_ENABLED == 0) {
     return 1; 
   }
   if (client.available()) {
-    String command = client.readStringUntil('\n');
-
-    if (command == "1") {
+    String command_e = client.readStringUntil('\n');
+    std::string command = command_e.c_str();
+    std::regex pattern("(B:(\d+),S:(\d+))");
+    std::smatch match;
+    if (std::regex_match(command, match, pattern)) {
+      work = (int)std::stoi(match[1]);
+      sstates.reference_speed = (int)std::stoi(match[2]);
+    }
+    if (work == BUGGY_WORK) {
       Serial.println("It should start");
       lastOne = true;
       return 1;
-    } else if (command == "0") {
+    } else if (work == BUGGY_IDLE) {
       Serial.println("It should stop.");
       lastOne = false;
       return 0;

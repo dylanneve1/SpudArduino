@@ -6,6 +6,10 @@
 #include "Arduino.h"
 #include <WiFiS3.h>
 #include "SensorManager.h"
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <regex>
 
 class WiFiManager {
   public:
@@ -13,7 +17,7 @@ class WiFiManager {
     void setupWiFi();
     void probe(arduino_states &astates, sensor_states &sstates);
     void messageClient(String message);
-    int startStopCommandReceived();
+    int startStopCommandReceived(sensor_states &sstates);
   private:
     void printCurrentInfo(arduino_states &astates, sensor_states &sstates);
     WiFiServer server;
