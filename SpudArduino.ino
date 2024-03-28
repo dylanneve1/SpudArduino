@@ -38,7 +38,9 @@ void setup() {
   // Wireless Setup
   // - Setup access point
   // - Connect server
-  wifi.setupWiFi();
+  if (WIFI_ENABLED == 1) {
+    wifi.setupWiFi();
+  }
   // Setup interrupts for encoders
   attachInterrupt(digitalPinToInterrupt(L_MOTOR_ENC), LencoderISR, RISING);
   attachInterrupt(digitalPinToInterrupt(R_MOTOR_ENC), RencoderISR, RISING);
@@ -63,7 +65,9 @@ void loop() {
   // Sensors
   sensors.probe(work, sstates, astates);
   // WiFi
-  wifi.probe(astates, sstates);
+  if (WIFI_ENABLED == 1) {
+    wifi.probe(astates, sstates);
+  }
   // Calculate speed
   sensors.calculateBuggySpeed(sstates, astates);
 }
