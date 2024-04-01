@@ -37,48 +37,32 @@ void SensorManager::probe(int work, sensor_states &sstates, arduino_states &asta
 }
 
 void SensorManager::ir_sensor_poll(sensor_states &sstates, arduino_states &astates) {
-  if (digitalRead(LEYE) != HIGH) {
-    ir_sensor_event(LEVENT, SENSOR_LOW, sstates, astates);
-  } else {
-    ir_sensor_event(LEVENT, SENSOR_HIGH, sstates, astates);
-  }
-  if (digitalRead(REYE) != HIGH) {
-    ir_sensor_event(REVENT, SENSOR_LOW, sstates, astates);
-  } else {
-    ir_sensor_event(REVENT, SENSOR_HIGH, sstates, astates);
-  }
-}
+  int left_intensity = digitalRead(LEYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
+  int right_intensity = digitalRead(REYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
 
-// IR Sensor Event
-void SensorManager::ir_sensor_event(int event, int intensity, sensor_states &sstates, arduino_states &astates) {
-  // Check if Left or Right IR Sensor
-  // If intensity is different from
-  // the current sensor states then
-  // we should log the state change
-  // as well as update the stored
-  if (event == LEVENT) {
-    if (intensity != sstates.ir_left) {
-      Serial.println("sensor_event: left state changed!");
-      sstates.ir_left = intensity;
-      if (intensity == SENSOR_HIGH) {
-        changeMotor(LEFT_MOTOR_ENABLE, sstates, astates);
-        Serial.println("Left motor enabled!");
-      } else if (intensity == SENSOR_LOW) {
-        changeMotor(LEFT_MOTOR_TURN, sstates, astates);
-        Serial.println("Left motor disabled!");
-      }
+  // Check if Left or Right IR Sensor intensity is different from the current sensor states
+  // If intensity is different, log the state change and update the stored states
+  if (left_intensity != sstates.ir_left) {
+    Serial.println("sensor_event: left state changed!");
+    sstates.ir_left = left_intensity;
+    if (left_intensity == SENSOR_HIGH) {
+      changeMotor(LEFT_MOTOR_ENABLE, sstates, astates);
+      Serial.println("Left motor enabled!");
+    } else if (left_intensity == SENSOR_LOW) {
+      changeMotor(LEFT_MOTOR_TURN, sstates, astates);
+      Serial.println("Left motor disabled!");
     }
-  } else if (event == REVENT) {
-    if (intensity != sstates.ir_right) {
-      Serial.println("sensor_event: right state changed!");
-      sstates.ir_right = intensity;
-      if (intensity == SENSOR_HIGH) {
-        changeMotor(RIGHT_MOTOR_ENABLE, sstates, astates);
-        Serial.println("Right motor enabled!");
-      } else if (intensity == SENSOR_LOW) {
-        changeMotor(RIGHT_MOTOR_TURN, sstates, astates);
-        Serial.println("Right motor disabled!");
-      }
+  }
+
+  if (right_intensity != sstates.ir_right) {
+    Serial.println("sensor_event: right state changed!");
+    sstates.ir_right = right_intensity;
+    if (right_intensity == SENSOR_HIGH) {
+      changeMotor(RIGHT_MOTOR_ENABLE, sstates, astates);
+      Serial.println("Right motor enabled!");
+    } else if (right_intensity == SENSOR_LOW) {
+      changeMotor(RIGHT_MOTOR_TURN, sstates, astates);
+      Serial.println("Right motor disabled!");
     }
   }
 }
@@ -219,17 +203,19 @@ void SensorManager::calculateBuggySpeed(sensor_states &sstates, arduino_states &
 }
 
 void SensorManager::alignBuggySpeed(sensor_states &sstates, arduino_states &astates) {
-  int convertedRefSpeed;
-   if (astates.avg_v > sstates.reference_speed) {
-    convertedRefSpeed += sstates.reference_speed - astates.avg_v;
-   }
-   if (convertedRefSpeed >= 150) {
+  int convertedRefSpeed = sstates.reference_speed;
+  if (astates.avg_v > sstates.reference_speed) {
+    convertedRefSpeed = sstates.reference_speed - (astates.avg_v - sstates.reference_speed);
+  } else if (astates.avg_v < sstates.reference_speed) {
+    convertedRefSpeed = sstates.reference_speed + (sstates.reference_speed - astates.avg_v);
+  }
+  if (convertedRefSpeed >= 150) {
     convertedRefSpeed = 150;
-   }
-   if (sstates.ir_left == SENSOR_HIGH) {
-     sstates.left_motor_speed = convertedRefSpeed;
-   }
-   if (sstates.ir_right == SENSOR_HIGH) {
-     sstates.right_motor_speed = convertedRefSpeed;
-   }
+  }
+  if (sstates.ir_left == SENSOR_HIGH) {
+    sstates.left_motor_speed = convertedRefSpeed;
+  }
+  if (sstates.ir_right == SENSOR_HIGH) {
+    sstates.right_motor_speed = convertedRefSpeed;
+  }
 }

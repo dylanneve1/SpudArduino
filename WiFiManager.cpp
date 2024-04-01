@@ -45,11 +45,10 @@ void WiFiManager::messageClient(String message) {
 
 // Function to check for start stop command
 int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
-  sstates.reference_speed = 20;
-  return 1;
   int work;
   if (WIFI_ENABLED == 0) {
-    return 1; 
+    sstates.reference_speed = 20;
+    return 1;
   }
   if (client.available()) {
     String command_e = client.readStringUntil('\n');
