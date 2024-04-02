@@ -28,7 +28,7 @@
 #define US_ECHO 9
 
 // How often to poll ultrasonic
-#define US_POLL_TIMEFRAME 500
+#define US_POLL_TIMEFRAME 1000
 
 // Left and right motor encoder
 #define R_MOTOR_ENC 2
@@ -63,6 +63,9 @@ struct sensor_states {
   int reference_speed;
   int converted_reference_speed = 100;
   double error;
+  bool first_us_ret = false;
+  int last_us_ret;
+  int bad_ret_cnt = 0;
 };
 
 // SensorManager class
@@ -71,7 +74,7 @@ class SensorManager {
 public:
   void probe(int work, sensor_states &sstates, arduino_states &astates);
   void pinSetup();
-  int getUltrasonicDistance();
+  int getUltrasonicDistance(sensor_states &sstates);
   void changeMotor(int motor, sensor_states &sstates, arduino_states &astates);
   double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
   void calculateBuggySpeed(sensor_states &sstates, arduino_states &astates);

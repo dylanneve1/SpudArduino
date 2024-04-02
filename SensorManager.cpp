@@ -73,11 +73,11 @@ void SensorManager::ir_sensor_poll(sensor_states &sstates, arduino_states &astat
 void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_states &astates) {
   int leftSpeed, rightSpeed;
   if (!sstates.pidEnabled) {
-    //Serial.println("pidEnabled: false");
+    Serial.println("pidEnabled: false");
     leftSpeed = sstates.left_motor_speed;
     rightSpeed = sstates.right_motor_speed;
   } else {
-    //Serial.println("pidEnabled: true");
+    Serial.println("pidEnabled: true");
     leftSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef * PID_MULTIPLE);
     rightSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef * PID_MULTIPLE);
   }
@@ -119,20 +119,20 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
   // incase changes have occurred
   // Check distance with ultrasonic sensor
   if (work == BUGGY_WORK) {
-    int distance = getUltrasonicDistance();
+    int distance = getUltrasonicDistance(sstates);
 
     sstates.usdist = distance;
 
+    Serial.print("Distance detected: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+
     if (distance < 20.0) {
-      Serial.print("Distance detected: ");
-      Serial.print(distance);
-      Serial.println(" cm");
       Serial.println("YOU NEED TO STOP!");
       changeMotor(LEFT_MOTOR_DISABLE, sstates, astates);
       changeMotor(RIGHT_MOTOR_DISABLE, sstates, astates);
       return;
-    }
-    else if (distance < 75.0) {
+    } else if (distance < 100.0) {
       sstates.pidCoef = computePID(distance, astates, sstates);
       sstates.pidEnabled = true;
     } else {
@@ -148,14 +148,37 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
 }
 
 // Function to get ultrasonic distance
-int SensorManager::getUltrasonicDistance() {
+int SensorManager::getUltrasonicDistance(sensor_states &sstates) {
+  int ret;
   digitalWrite(US_TRIG, LOW);
   delayMicroseconds(2);
   digitalWrite(US_TRIG, HIGH);
   delayMicroseconds(10);
   digitalWrite(US_TRIG, LOW);
   long duration = pulseIn(US_ECHO, HIGH);
-  return duration / 58;
+  ret = duration / 58;
+  if (sstates.first_us_ret) {
+    if (ret <= 20) {
+      sstates.last_us_ret = ret;
+      return ret;
+    }
+    if (abs(ret - sstates.last_us_ret) > 100) {
+      if (sstates.bad_ret_cnt <= 3) {
+        sstates.bad_ret_cnt++;
+        return sstates.last_us_ret;
+      } else {
+        sstates.last_us_ret = ret;
+        sstates.bad_ret_cnt = 0;
+        return ret;
+      }
+    } else {
+      return ret;
+    }
+  } else {
+    sstates.last_us_ret = ret;
+    sstates.first_us_ret = true;
+    return ret;
+  }
 }
 
 double SensorManager::checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions) {
