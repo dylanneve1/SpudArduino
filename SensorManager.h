@@ -62,6 +62,7 @@ struct sensor_states {
   int usdist;
   int reference_speed;
   int converted_reference_speed = 100;
+  double error;
 };
 
 // SensorManager class
@@ -77,14 +78,13 @@ public:
 
 private:
   void alignBuggySpeed(sensor_states &sstates, arduino_states &astates);
-  double computePID(double inp, arduino_states &astates);
+  double computePID(double inp, arduino_states &astates, sensor_states &sstates);
   void ir_sensor_poll(sensor_states &sstates, arduino_states &astates);
   void ultrasonic_poll(int work, sensor_states &sstates, arduino_states &astates);
   double kp = (1 / 7.3);
   double ki = 1 / 20;
   double kd = 2;
   double elapsedTime;
-  double error;
   double lastError;
   const double setPoint = 20;
   double cumError, rateError;

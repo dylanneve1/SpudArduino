@@ -133,7 +133,7 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
       return;
     }
     else if (distance < 75.0) {
-      sstates.pidCoef = computePID(distance, astates);
+      sstates.pidCoef = computePID(distance, astates, sstates);
       sstates.pidEnabled = true;
     } else {
       sstates.pidEnabled = false;
@@ -166,16 +166,16 @@ double SensorManager::checkWheelEnc(volatile int leftRevolutions, volatile int r
   return ret;
 }
 
-double SensorManager::computePID(double inp, arduino_states &astates) {
+double SensorManager::computePID(double inp, arduino_states &astates, sensor_states &sstates) {
   elapsedTime = (double)(astates.current_time - astates.last_pid_calc_time);
 
-  error = (setPoint - inp);
-  cumError += error * elapsedTime;
-  rateError = (error - lastError) / elapsedTime;
+  sstates.error = (setPoint - inp);
+  cumError += sstates.error * elapsedTime;
+  rateError = (sstates.error - lastError) / elapsedTime;
 
-  double ret = kp * error + ki * cumError + kd * rateError;
+  double ret = kp * sstates.error + ki * cumError + kd * rateError;
 
-  lastError = error;
+  lastError = sstates.error;
   astates.last_pid_calc_time = astates.current_time;
 
   return ret;

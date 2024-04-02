@@ -87,6 +87,10 @@ void WiFiManager::printCurrentInfo(arduino_states &astates, sensor_states &sstat
   data += ",D:";
   data += String(sstates.usdist);
   data += ",T:";
+  data += String(astates.avg_v);
+  data += ",V:";
+  data += String(sstates.error);
+  data += ",E:";
   data += astates.dist;
   messageClient(data);
 }
