@@ -61,6 +61,7 @@ struct sensor_states {
   bool pidEnabled = false;
   int usdist;
   int reference_speed;
+  int converted_reference_speed = 100;
 };
 
 // SensorManager class
