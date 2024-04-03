@@ -3,6 +3,8 @@
 
 #include "SpudArduino.h"
 
+#define INITIAL_REF_SPEED 120
+
 // Right and left motor macros
 #define LEFT_MOTOR_ENABLE 0
 #define RIGHT_MOTOR_ENABLE 1
@@ -54,14 +56,14 @@
 struct sensor_states {
   int ir_left = SENSOR_LOW;
   int ir_right = SENSOR_LOW;
-  int left_motor_speed = MOTOR_SPEED_MAX;
-  int right_motor_speed = MOTOR_SPEED_MAX;
+  int left_motor_speed = INITIAL_REF_SPEED;
+  int right_motor_speed = INITIAL_REF_SPEED;
   bool firstPoll = true;
   int pidCoef;
   bool pidEnabled = false;
   int usdist;
   int reference_speed;
-  int converted_reference_speed =80;
+  int converted_reference_speed = INITIAL_REF_SPEED;
   double error;
   bool first_us_ret = false;
   int last_us_ret;

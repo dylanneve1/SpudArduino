@@ -63,10 +63,12 @@ int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
     }
     if (work == BUGGY_WORK) {
       Serial.println("It should start");
+      sstates.converted_reference_speed = INITIAL_REF_SPEED;
       lastOne = true;
       return 1;
     } else if (work == BUGGY_IDLE) {
       Serial.println("It should stop.");
+      sstates.converted_reference_speed = INITIAL_REF_SPEED;
       lastOne = false;
       return 0;
     }

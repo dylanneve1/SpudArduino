@@ -131,11 +131,12 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
       Serial.println("YOU NEED TO STOP!");
       changeMotor(LEFT_MOTOR_DISABLE, sstates, astates);
       changeMotor(RIGHT_MOTOR_DISABLE, sstates, astates);
+      sstates.pidEnabled = true;
       return;
     } else if (distance < 50.0) {
       sstates.pidCoef = computePID(distance, astates, sstates);
       sstates.pidEnabled = true;
-      sstates.converted_reference_speed = 100;
+      sstates.converted_reference_speed = INITIAL_REF_SPEED;
     } else {
       sstates.pidEnabled = false;
     }
