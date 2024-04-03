@@ -65,9 +65,9 @@ void loop() {
   // Sensors
   sensors.probe(work, sstates, astates);
   // WiFi
-  if (WIFI_ENABLED == 1) {
+  //if (WIFI_ENABLED == 1) {
     wifi.probe(astates, sstates);
-  }
+  //}
   // Calculate speed
   sensors.calculateBuggySpeed(sstates, astates);
 }

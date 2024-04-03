@@ -37,8 +37,8 @@ void SensorManager::probe(int work, sensor_states &sstates, arduino_states &asta
 }
 
 void SensorManager::ir_sensor_poll(sensor_states &sstates, arduino_states &astates) {
-  int left_intensity = digitalRead(LEYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
-  int right_intensity = digitalRead(REYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
+  int left_intensity = SENSOR_HIGH; //digitalRead(LEYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
+  int right_intensity = SENSOR_HIGH; //digitalRead(REYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
 
   // Check if Left or Right IR Sensor intensity is different from the current sensor states
   // If intensity is different, log the state change and update the stored states
@@ -228,15 +228,11 @@ void SensorManager::calculateBuggySpeed(sensor_states &sstates, arduino_states &
 }
 
 void SensorManager::alignBuggySpeed(sensor_states &sstates, arduino_states &astates) {
-  //Serial.print("reference_speed: ");
-  //Serial.println(sstates.reference_speed);
-  //Serial.print("avg_v: ");
-  //Serial.println(astates.avg_v);
   int newSpeed = sstates.converted_reference_speed;
   if (sstates.reference_speed > astates.avg_v) {
-    newSpeed += 10;
+    newSpeed += abs(sstates.reference_speed - astates.avg_v) * 10;
   } else {
-    newSpeed -= 10;
+    newSpeed -= abs(sstates.reference_speed - astates.avg_v) * 10;
   }
   if (newSpeed >= 0) {
     sstates.converted_reference_speed = newSpeed;

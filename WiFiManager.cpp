@@ -2,6 +2,7 @@
 
 #include "SpudArduino.h"
 #include "WiFiManager.h"
+#include <iostream>
 
 // Constructor for WiFiManager class
 WiFiManager::WiFiManager()
@@ -80,6 +81,11 @@ int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
 }
 
 void WiFiManager::printCurrentInfo(arduino_states &astates, sensor_states &sstates) {
+  Serial.print("reference_speed: ");
+  Serial.println(sstates.reference_speed);
+  Serial.print("avg_v: ");
+  Serial.println(astates.avg_v);
+
   String data = "L:";
   data += sstates.left_motor_speed;
   data += ",R:";
@@ -87,10 +93,11 @@ void WiFiManager::printCurrentInfo(arduino_states &astates, sensor_states &sstat
   data += ",D:";
   data += String(sstates.usdist);
   data += ",T:";
-  data += String(astates.avg_v);
-  data += ",V:";
-  data += String(sstates.error);
-  data += ",E:";
   data += astates.dist;
+  data += ",V:";
+  data += String(std::to_string((int)astates.avg_v).c_str());
+  data += ",E:";
+  data += String(sstates.error);
+  Serial.println(data);
   messageClient(data);
 }
