@@ -37,8 +37,8 @@ void SensorManager::probe(int work, sensor_states &sstates, arduino_states &asta
 }
 
 void SensorManager::ir_sensor_poll(sensor_states &sstates, arduino_states &astates) {
-  int left_intensity = SENSOR_HIGH; //digitalRead(LEYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
-  int right_intensity = SENSOR_HIGH; //digitalRead(REYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
+  int left_intensity = digitalRead(LEYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
+  int right_intensity = digitalRead(REYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
 
   // Check if Left or Right IR Sensor intensity is different from the current sensor states
   // If intensity is different, log the state change and update the stored states
@@ -135,6 +135,7 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
     } else if (distance < 50.0) {
       sstates.pidCoef = computePID(distance, astates, sstates);
       sstates.pidEnabled = true;
+      sstates.converted_reference_speed = 100;
     } else {
       sstates.pidEnabled = false;
     }
@@ -223,18 +224,27 @@ void SensorManager::calculateBuggySpeed(sensor_states &sstates, arduino_states &
       astates.first_distance_checked = true;
     }
     astates.last_speed_calc_time = astates.current_time;
-    alignBuggySpeed(sstates, astates);
+    if (!sstates.pidEnabled && sstates.ir_right == SENSOR_HIGH && sstates.ir_left == SENSOR_HIGH && sstates.usdist > 20) {
+      alignBuggySpeed(sstates, astates);
+    }
   }
 }
 
 void SensorManager::alignBuggySpeed(sensor_states &sstates, arduino_states &astates) {
   int newSpeed = sstates.converted_reference_speed;
+  Serial.print("abs_diff: ");
+  Serial.println(abs(sstates.reference_speed - astates.avg_v));
+  Serial.print("motor_speed: ");
+  Serial.println(sstates.left_motor_speed);
   if (sstates.reference_speed > astates.avg_v) {
-    newSpeed += abs(sstates.reference_speed - astates.avg_v) * 10;
+    newSpeed += 10;
   } else {
-    newSpeed -= abs(sstates.reference_speed - astates.avg_v) * 10;
+    newSpeed -= 10;
   }
   if (newSpeed >= 0) {
+    if (newSpeed > 150) {
+      newSpeed = 150;
+    }
     sstates.converted_reference_speed = newSpeed;
     sstates.left_motor_speed = newSpeed;
     sstates.right_motor_speed = newSpeed;
