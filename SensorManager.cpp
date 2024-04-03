@@ -132,7 +132,7 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
       changeMotor(LEFT_MOTOR_DISABLE, sstates, astates);
       changeMotor(RIGHT_MOTOR_DISABLE, sstates, astates);
       return;
-    } else if (distance < 100.0) {
+    } else if (distance < 50.0) {
       sstates.pidCoef = computePID(distance, astates, sstates);
       sstates.pidEnabled = true;
     } else {

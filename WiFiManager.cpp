@@ -47,7 +47,7 @@ void WiFiManager::messageClient(String message) {
 int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
   int work;
   if (WIFI_ENABLED == 0) {
-    sstates.reference_speed = 20;
+    sstates.reference_speed = 10;
     return 1;
     Serial.println("WiFiManager: WiFi disabled!");
   }

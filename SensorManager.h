@@ -61,7 +61,7 @@ struct sensor_states {
   bool pidEnabled = false;
   int usdist;
   int reference_speed;
-  int converted_reference_speed = 100;
+  int converted_reference_speed =80;
   double error;
   bool first_us_ret = false;
   int last_us_ret;
