@@ -82,12 +82,12 @@ void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_state
     rightSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef * PID_MULTIPLE);
   }
   if (sstates.ir_left != sstates.ir_right) {
-    leftSpeed = 150;
-    rightSpeed = 150;
+    leftSpeed = 255;
+    rightSpeed = 255;
   }
-  if (leftSpeed > 150 || rightSpeed > 150) {
-    leftSpeed = 150;
-    rightSpeed = 150;
+  if (leftSpeed > 140 || rightSpeed > 140) {
+    leftSpeed = 140;
+    rightSpeed = 140;
   }
   //Serial.print("leftSpeed: ");
   //Serial.println(leftSpeed);
@@ -112,11 +112,11 @@ void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_state
     digitalWrite(R_MOTOR_IN1, LOW);
     digitalWrite(R_MOTOR_IN2, LOW);
   } else if (motor == LEFT_MOTOR_TURN) {
-    analogWrite(L_MOTOR_EN, MOTOR_SPEED_TURN);
+    analogWrite(L_MOTOR_EN, 0); //MOTOR_SPEED_TURN);
     digitalWrite(L_MOTOR_IN1, LOW);
     digitalWrite(L_MOTOR_IN2, HIGH);
   } else if (motor == RIGHT_MOTOR_TURN) {
-    analogWrite(R_MOTOR_EN, MOTOR_SPEED_TURN);
+    analogWrite(R_MOTOR_EN, 0); //MOTOR_SPEED_TURN);
     digitalWrite(R_MOTOR_IN1, LOW);
     digitalWrite(R_MOTOR_IN2, HIGH);
   }
@@ -251,8 +251,8 @@ void SensorManager::alignBuggySpeed(sensor_states &sstates, arduino_states &asta
     newSpeed -= 10;
   }
   if (newSpeed >= 0) {
-    if (newSpeed > 150) {
-      newSpeed = 150;
+    if (newSpeed > 140) {
+      newSpeed = 140;
     }
     sstates.converted_reference_speed = newSpeed;
     sstates.left_motor_speed = newSpeed;

@@ -3,7 +3,7 @@
 
 #include "SpudArduino.h"
 
-#define INITIAL_REF_SPEED 120
+#define INITIAL_REF_SPEED 100
 
 // Right and left motor macros
 #define LEFT_MOTOR_ENABLE 0
