@@ -73,7 +73,7 @@ void SensorManager::ir_sensor_poll(sensor_states &sstates, arduino_states &astat
 void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_states &astates) {
   int leftSpeed, rightSpeed;
   if (!sstates.pidEnabled) {
-    //Serial.println("pidEnabled: false");
+    Serial.println("pidEnabled: false");
     leftSpeed = sstates.left_motor_speed;
     rightSpeed = sstates.right_motor_speed;
   } else {
@@ -82,8 +82,8 @@ void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_state
     rightSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef * PID_MULTIPLE);
   }
   if (sstates.ir_left != sstates.ir_right) {
-    leftSpeed = 140;
-    rightSpeed = 140;
+    leftSpeed = 150;
+    rightSpeed = 150;
   }
   if (leftSpeed > 150 || rightSpeed > 150) {
     leftSpeed = 150;
