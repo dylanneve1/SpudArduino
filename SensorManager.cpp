@@ -73,7 +73,7 @@ void SensorManager::ir_sensor_poll(sensor_states &sstates, arduino_states &astat
 void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_states &astates) {
   int leftSpeed, rightSpeed;
   if (!sstates.pidEnabled) {
-    Serial.println("pidEnabled: false");
+    //Serial.println("pidEnabled: false");
     leftSpeed = sstates.left_motor_speed;
     rightSpeed = sstates.right_motor_speed;
   } else {
