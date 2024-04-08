@@ -48,29 +48,34 @@ void WiFiManager::messageClient(String message) {
 int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
   int work;
   if (WIFI_ENABLED == 0) {
-    sstates.reference_speed = 15;
+    sstates.reference_speed = 25;
     return 1;
     Serial.println("WiFiManager: WiFi disabled!");
   }
   if (client.available()) {
     String command_e = client.readStringUntil('\n');
-    int l= length.command_e;
-    for (int i=0; i<l; i++)
-    {
-      char ch[i]= '';
-      if (ch=='B')
-      {work= (int)ch[i+2];}
-      else if (ch=='S')
-      ssates.reference_speed= (int)command.esubstr(i+2,l-1)
-
+    Serial.println(command_e);
+    char ch;
+    int l = command_e.length();
+    for (int i = 0; i < l; i++) {
+      ch = command_e[i];
+      //Serial.println(ch);
+      if (ch == 'B') {
+        work = command_e[i + 2] - '0';
+        Serial.print("work: ");
+        Serial.print(command_e[i + 2]);
+        Serial.print(" ");
+        Serial.println(work);
+      } else if (ch == 'S') {
+        std::string eh = command_e.c_str();
+        std::string speed = eh.substr(i + 2);
+        sstates.reference_speed = (int)stoi(speed);
+      }
     }
-    // std::string command = command_e.c_str();
-    // std::regex pattern(R"(B:(\d+),S:(\d+))");
-    // std::smatch match;
-    // if (std::regex_match(command, match, pattern)) {
-    //   work = (int)std::stoi(match[1]);
-    //   sstates.reference_speed = (int)std::stoi(match[2]);
-    // }
+    Serial.print("work: ");
+    Serial.println(work);
+    Serial.print("speed (ref): ");
+    Serial.println(sstates.reference_speed);
     if (work == BUGGY_WORK) {
       Serial.println("It should start");
       sstates.converted_reference_speed = INITIAL_REF_SPEED;

@@ -6,10 +6,6 @@
 #include "Arduino.h"
 #include <WiFiS3.h>
 #include "SensorManager.h"
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <regex>
 
 class WiFiManager {
   public:

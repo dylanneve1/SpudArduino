@@ -3,7 +3,7 @@
 
 #include "SpudArduino.h"
 
-#define INITIAL_REF_SPEED 120
+#define INITIAL_REF_SPEED 100
 
 // Right and left motor macros
 #define LEFT_MOTOR_ENABLE 0
@@ -30,7 +30,7 @@
 #define US_ECHO 9
 
 // How often to poll ultrasonic
-#define US_POLL_TIMEFRAME 1000
+#define US_POLL_TIMEFRAME 500
 
 // Left and right motor encoder
 #define R_MOTOR_ENC 2

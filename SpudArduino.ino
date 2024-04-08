@@ -53,11 +53,11 @@ void setup() {
 
 // Main loop
 void loop() {
-  if (sstates.pidEnabled) {
-    matrix.renderBitmap(pid_frame, 8, 12);
-  } else {
-    matrix.renderBitmap(obj_frame, 8, 12);
-  }
+//  if (sstates.pidEnabled) {
+//    matrix.renderBitmap(pid_frame, 8, 12);
+//  } else {
+//    matrix.renderBitmap(obj_frame, 8, 12);
+//  }
   astates.dist = sensors.checkWheelEnc(leftRevolutions, rightRevolutions);
   // Check whether buggy has recieved
   // start or stop command and if it
