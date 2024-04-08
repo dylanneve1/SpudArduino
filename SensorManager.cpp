@@ -81,6 +81,14 @@ void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_state
     leftSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef * PID_MULTIPLE);
     rightSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef * PID_MULTIPLE);
   }
+  if (sstates.ir_left != sstates.ir_right) {
+    leftSpeed = 140;
+    rightSpeed = 140;
+  }
+  if (leftSpeed > 150 || rightSpeed > 150) {
+    leftSpeed = 150;
+    rightSpeed = 150;
+  }
   //Serial.print("leftSpeed: ");
   //Serial.println(leftSpeed);
   //Serial.print("rightSpeed: ");
@@ -133,7 +141,7 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
       changeMotor(RIGHT_MOTOR_DISABLE, sstates, astates);
       sstates.pidEnabled = true;
       return;
-    } else if (distance < 50.0) {
+    } else if (distance < 30.0) {
       sstates.pidCoef = computePID(distance, astates, sstates);
       sstates.pidEnabled = true;
       sstates.converted_reference_speed = INITIAL_REF_SPEED;
