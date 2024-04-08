@@ -53,13 +53,23 @@ int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
   }
   if (client.available()) {
     String command_e = client.readStringUntil('\n');
-    std::string command = command_e.c_str();
-    std::regex pattern(R"(B:(\d+),S:(\d+))");
-    std::smatch match;
-    if (std::regex_match(command, match, pattern)) {
-      work = (int)std::stoi(match[1]);
-      sstates.reference_speed = (int)std::stoi(match[2]);
+    int l= length.command_e;
+    for (int i=0; i<l; i++)
+    {
+      char ch[i]= '';
+      if (ch=='B')
+      {work= (int)ch[i+2];}
+      else if (ch=='S')
+      ssates.reference_speed= (int)command.esubstr(i+2,l-1)
+
     }
+    // std::string command = command_e.c_str();
+    // std::regex pattern(R"(B:(\d+),S:(\d+))");
+    // std::smatch match;
+    // if (std::regex_match(command, match, pattern)) {
+    //   work = (int)std::stoi(match[1]);
+    //   sstates.reference_speed = (int)std::stoi(match[2]);
+    // }
     if (work == BUGGY_WORK) {
       Serial.println("It should start");
       lastOne = true;
