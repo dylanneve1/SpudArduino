@@ -3,6 +3,8 @@
 
 #include "SpudArduino.h"
 
+#define INITIAL_REF_SPEED 120
+
 // Right and left motor macros
 #define LEFT_MOTOR_ENABLE 0
 #define RIGHT_MOTOR_ENABLE 1
@@ -28,7 +30,7 @@
 #define US_ECHO 9
 
 // How often to poll ultrasonic
-#define US_POLL_TIMEFRAME 500
+#define US_POLL_TIMEFRAME 1000
 
 // Left and right motor encoder
 #define R_MOTOR_ENC 2
@@ -54,14 +56,18 @@
 struct sensor_states {
   int ir_left = SENSOR_LOW;
   int ir_right = SENSOR_LOW;
-  int left_motor_speed = MOTOR_SPEED_MAX;
-  int right_motor_speed = MOTOR_SPEED_MAX;
+  int left_motor_speed = INITIAL_REF_SPEED;
+  int right_motor_speed = INITIAL_REF_SPEED;
   bool firstPoll = true;
   int pidCoef;
   bool pidEnabled = false;
   int usdist;
   int reference_speed;
-  int converted_reference_speed = 100;
+  int converted_reference_speed = INITIAL_REF_SPEED;
+  double error;
+  bool first_us_ret = false;
+  int last_us_ret;
+  int bad_ret_cnt = 0;
 };
 
 // SensorManager class
@@ -70,21 +76,20 @@ class SensorManager {
 public:
   void probe(int work, sensor_states &sstates, arduino_states &astates);
   void pinSetup();
-  int getUltrasonicDistance();
+  int getUltrasonicDistance(sensor_states &sstates);
   void changeMotor(int motor, sensor_states &sstates, arduino_states &astates);
   double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
   void calculateBuggySpeed(sensor_states &sstates, arduino_states &astates);
 
 private:
   void alignBuggySpeed(sensor_states &sstates, arduino_states &astates);
-  double computePID(double inp, arduino_states &astates);
+  double computePID(double inp, arduino_states &astates, sensor_states &sstates);
   void ir_sensor_poll(sensor_states &sstates, arduino_states &astates);
   void ultrasonic_poll(int work, sensor_states &sstates, arduino_states &astates);
   double kp = (1 / 7.3);
   double ki = 1 / 20;
   double kd = 2;
   double elapsedTime;
-  double error;
   double lastError;
   const double setPoint = 20;
   double cumError, rateError;

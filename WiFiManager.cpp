@@ -2,6 +2,7 @@
 
 #include "SpudArduino.h"
 #include "WiFiManager.h"
+#include <iostream>
 
 // Constructor for WiFiManager class
 WiFiManager::WiFiManager()
@@ -47,7 +48,7 @@ void WiFiManager::messageClient(String message) {
 int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
   int work;
   if (WIFI_ENABLED == 0) {
-    sstates.reference_speed = 20;
+    sstates.reference_speed = 15;
     return 1;
     Serial.println("WiFiManager: WiFi disabled!");
   }
@@ -72,10 +73,12 @@ int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
     // }
     if (work == BUGGY_WORK) {
       Serial.println("It should start");
+      sstates.converted_reference_speed = INITIAL_REF_SPEED;
       lastOne = true;
       return 1;
     } else if (work == BUGGY_IDLE) {
       Serial.println("It should stop.");
+      sstates.converted_reference_speed = INITIAL_REF_SPEED;
       lastOne = false;
       return 0;
     }
@@ -90,6 +93,11 @@ int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
 }
 
 void WiFiManager::printCurrentInfo(arduino_states &astates, sensor_states &sstates) {
+  Serial.print("reference_speed: ");
+  Serial.println(sstates.reference_speed);
+  Serial.print("avg_v: ");
+  Serial.println(astates.avg_v);
+
   String data = "L:";
   data += sstates.left_motor_speed;
   data += ",R:";
@@ -98,5 +106,10 @@ void WiFiManager::printCurrentInfo(arduino_states &astates, sensor_states &sstat
   data += String(sstates.usdist);
   data += ",T:";
   data += astates.dist;
+  data += ",V:";
+  data += String(std::to_string((int)astates.avg_v).c_str());
+  data += ",E:";
+  data += String(sstates.error);
+  Serial.println(data);
   messageClient(data);
 }

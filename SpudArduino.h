@@ -2,7 +2,7 @@
 #define SPUD_ARDUINO_H
 
 // Enable and disable WiFi
-#define WIFI_ENABLED 0
+#define WIFI_ENABLED 1
 
 // Server poll frequency
 #define SERVER_POLL_TIMEFRAME 2000
@@ -15,7 +15,7 @@
 #define MOTOR_SPEED_MAX 150
 #define MOTOR_SPEED_MIN 0
 #define MOTOR_SPEED_TURN 70
-#define MOTOR_SPEED_PID 100
+#define MOTOR_SPEED_PID 120
 
 #define PID_MULTIPLE 12
 

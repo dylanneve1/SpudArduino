@@ -73,11 +73,11 @@ void SensorManager::ir_sensor_poll(sensor_states &sstates, arduino_states &astat
 void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_states &astates) {
   int leftSpeed, rightSpeed;
   if (!sstates.pidEnabled) {
-    //Serial.println("pidEnabled: false");
+    Serial.println("pidEnabled: false");
     leftSpeed = sstates.left_motor_speed;
     rightSpeed = sstates.right_motor_speed;
   } else {
-    //Serial.println("pidEnabled: true");
+    Serial.println("pidEnabled: true");
     leftSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef * PID_MULTIPLE);
     rightSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef * PID_MULTIPLE);
   }
@@ -119,22 +119,24 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
   // incase changes have occurred
   // Check distance with ultrasonic sensor
   if (work == BUGGY_WORK) {
-    int distance = getUltrasonicDistance();
+    int distance = getUltrasonicDistance(sstates);
 
     sstates.usdist = distance;
 
+    Serial.print("Distance detected: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+
     if (distance < 20.0) {
-      Serial.print("Distance detected: ");
-      Serial.print(distance);
-      Serial.println(" cm");
       Serial.println("YOU NEED TO STOP!");
       changeMotor(LEFT_MOTOR_DISABLE, sstates, astates);
       changeMotor(RIGHT_MOTOR_DISABLE, sstates, astates);
-      return;
-    }
-    else if (distance < 75.0) {
-      sstates.pidCoef = computePID(distance, astates);
       sstates.pidEnabled = true;
+      return;
+    } else if (distance < 50.0) {
+      sstates.pidCoef = computePID(distance, astates, sstates);
+      sstates.pidEnabled = true;
+      sstates.converted_reference_speed = INITIAL_REF_SPEED;
     } else {
       sstates.pidEnabled = false;
     }
@@ -148,14 +150,37 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
 }
 
 // Function to get ultrasonic distance
-int SensorManager::getUltrasonicDistance() {
+int SensorManager::getUltrasonicDistance(sensor_states &sstates) {
+  int ret;
   digitalWrite(US_TRIG, LOW);
   delayMicroseconds(2);
   digitalWrite(US_TRIG, HIGH);
   delayMicroseconds(10);
   digitalWrite(US_TRIG, LOW);
   long duration = pulseIn(US_ECHO, HIGH);
-  return duration / 58;
+  ret = duration / 58;
+  if (sstates.first_us_ret) {
+    if (ret <= 20) {
+      sstates.last_us_ret = ret;
+      return ret;
+    }
+    if (abs(ret - sstates.last_us_ret) > 100) {
+      if (sstates.bad_ret_cnt <= 3) {
+        sstates.bad_ret_cnt++;
+        return sstates.last_us_ret;
+      } else {
+        sstates.last_us_ret = ret;
+        sstates.bad_ret_cnt = 0;
+        return ret;
+      }
+    } else {
+      return ret;
+    }
+  } else {
+    sstates.last_us_ret = ret;
+    sstates.first_us_ret = true;
+    return ret;
+  }
 }
 
 double SensorManager::checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions) {
@@ -166,16 +191,16 @@ double SensorManager::checkWheelEnc(volatile int leftRevolutions, volatile int r
   return ret;
 }
 
-double SensorManager::computePID(double inp, arduino_states &astates) {
+double SensorManager::computePID(double inp, arduino_states &astates, sensor_states &sstates) {
   elapsedTime = (double)(astates.current_time - astates.last_pid_calc_time);
 
-  error = (setPoint - inp);
-  cumError += error * elapsedTime;
-  rateError = (error - lastError) / elapsedTime;
+  sstates.error = (setPoint - inp);
+  cumError += sstates.error * elapsedTime;
+  rateError = (sstates.error - lastError) / elapsedTime;
 
-  double ret = kp * error + ki * cumError + kd * rateError;
+  double ret = kp * sstates.error + ki * cumError + kd * rateError;
 
-  lastError = error;
+  lastError = sstates.error;
   astates.last_pid_calc_time = astates.current_time;
 
   return ret;
@@ -200,22 +225,27 @@ void SensorManager::calculateBuggySpeed(sensor_states &sstates, arduino_states &
       astates.first_distance_checked = true;
     }
     astates.last_speed_calc_time = astates.current_time;
-    alignBuggySpeed(sstates, astates);
+    if (!sstates.pidEnabled && sstates.ir_right == SENSOR_HIGH && sstates.ir_left == SENSOR_HIGH && sstates.usdist > 20) {
+      alignBuggySpeed(sstates, astates);
+    }
   }
 }
 
 void SensorManager::alignBuggySpeed(sensor_states &sstates, arduino_states &astates) {
-  //Serial.print("reference_speed: ");
-  //Serial.println(sstates.reference_speed);
-  //Serial.print("avg_v: ");
-  //Serial.println(astates.avg_v);
   int newSpeed = sstates.converted_reference_speed;
+  Serial.print("abs_diff: ");
+  Serial.println(abs(sstates.reference_speed - astates.avg_v));
+  Serial.print("motor_speed: ");
+  Serial.println(sstates.left_motor_speed);
   if (sstates.reference_speed > astates.avg_v) {
     newSpeed += 10;
   } else {
     newSpeed -= 10;
   }
   if (newSpeed >= 0) {
+    if (newSpeed > 150) {
+      newSpeed = 150;
+    }
     sstates.converted_reference_speed = newSpeed;
     sstates.left_motor_speed = newSpeed;
     sstates.right_motor_speed = newSpeed;
