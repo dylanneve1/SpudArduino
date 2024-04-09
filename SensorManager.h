@@ -30,7 +30,7 @@
 #define US_ECHO 9
 
 // How often to poll ultrasonic
-#define US_POLL_TIMEFRAME 1000
+#define US_POLL_TIMEFRAME 500
 
 // Left and right motor encoder
 #define R_MOTOR_ENC 2

@@ -2,11 +2,11 @@
 #define SPUD_ARDUINO_H
 
 // Enable and disable WiFi
-#define WIFI_ENABLED 1
+#define WIFI_ENABLED 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 
 // Server poll frequency
 #define SERVER_POLL_TIMEFRAME 2000
-#define SPEED_CALC_POLL_TIMEFRAME 1000
+#define SPEED_CALC_POLL_TIMEFRAME 500
 
 // Buggy work states
 #define BUGGY_WORK 1
@@ -14,7 +14,7 @@
 
 #define MOTOR_SPEED_MAX 150
 #define MOTOR_SPEED_MIN 0
-#define MOTOR_SPEED_TURN 70
+#define MOTOR_SPEED_TURN 50
 #define MOTOR_SPEED_PID 120
 
 #define PID_MULTIPLE 12
