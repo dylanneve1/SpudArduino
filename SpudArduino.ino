@@ -3,13 +3,10 @@
 #include "SensorManager.h"
 #include "SpudArduino.h"
 #include "WiFiManager.h"
-#include "Arduino_LED_Matrix.h"
-#include "frames.h"
 
 // Class initialization
 SensorManager sensors;
 WiFiManager wifi;
-ArduinoLEDMatrix matrix;
 
 // Data structure of states
 sensor_states sstates;
@@ -26,7 +23,6 @@ volatile int rightRevolutions = 0;
 
 // Setup function
 void setup() {
-  matrix.begin();
   // Set start time, last update time
   // and last server communication time
   // to the current millis()
@@ -53,11 +49,6 @@ void setup() {
 
 // Main loop
 void loop() {
-//  if (sstates.pidEnabled) {
-//    matrix.renderBitmap(pid_frame, 8, 12);
-//  } else {
-//    matrix.renderBitmap(obj_frame, 8, 12);
-//  }
   astates.dist = sensors.checkWheelEnc(leftRevolutions, rightRevolutions);
   // Check whether buggy has recieved
   // start or stop command and if it

@@ -2,6 +2,7 @@
 #define SENSOR_MANAGER_H
 
 #include "SpudArduino.h"
+#include "Arduino_LED_Matrix.h"
 
 #define INITIAL_REF_SPEED 100
 
@@ -73,26 +74,27 @@ struct sensor_states {
 // SensorManager class
 class SensorManager {
 
-public:
-  void probe(int work, sensor_states &sstates, arduino_states &astates);
-  void pinSetup();
-  int getUltrasonicDistance(sensor_states &sstates);
-  void changeMotor(int motor, sensor_states &sstates, arduino_states &astates);
-  double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
-  void calculateBuggySpeed(sensor_states &sstates, arduino_states &astates);
+  public:
+    void probe(int work, sensor_states &sstates, arduino_states &astates);
+    void pinSetup();
+    int getUltrasonicDistance(sensor_states &sstates);
+    void changeMotor(int motor, sensor_states &sstates, arduino_states &astates);
+    double checkWheelEnc(volatile int leftRevolutions, volatile int rightRevolutions);
+    void calculateBuggySpeed(sensor_states &sstates, arduino_states &astates);
 
-private:
-  void alignBuggySpeed(sensor_states &sstates, arduino_states &astates);
-  double computePID(double inp, arduino_states &astates, sensor_states &sstates);
-  void ir_sensor_poll(sensor_states &sstates, arduino_states &astates);
-  void ultrasonic_poll(int work, sensor_states &sstates, arduino_states &astates);
-  double kp = (1 / 7.3);
-  double ki = 1 / 20;
-  double kd = 2;
-  double elapsedTime;
-  double lastError;
-  const double setPoint = 20;
-  double cumError, rateError;
+  private:
+    ArduinoLEDMatrix matrix;
+    void alignBuggySpeed(sensor_states &sstates, arduino_states &astates);
+    double computePID(double inp, arduino_states &astates, sensor_states &sstates);
+    void ir_sensor_poll(sensor_states &sstates, arduino_states &astates);
+    void ultrasonic_poll(int work, sensor_states &sstates, arduino_states &astates);
+    double kp = (1 / 7.3);
+    double ki = 1 / 20;
+    double kd = 2;
+    double elapsedTime;
+    double lastError;
+    const double setPoint = 20;
+    double cumError, rateError;
 };
 
 #endif
