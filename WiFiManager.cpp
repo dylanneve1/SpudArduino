@@ -48,7 +48,7 @@ void WiFiManager::messageClient(String message) {
 int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
   int work;
   if (WIFI_ENABLED == 0) {
-    sstates.reference_speed = 25;
+    sstates.reference_speed = 40;
     return 1;
   }
   if (client.available()) {

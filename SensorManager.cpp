@@ -2,7 +2,7 @@
 #include <Serial.h>
 #include "WiFiManager.h"
 #include "SpudArduino.h"
-
+#include "frames.h"
 
 // Setup pins for the SensorManager
 void SensorManager::pinSetup() {
@@ -25,6 +25,9 @@ void SensorManager::pinSetup() {
 // necessary updates to the data structs
 void SensorManager::probe(int work, sensor_states &sstates, arduino_states &astates) {
   if (work == BUGGY_WORK) {
+    if (sstates.firstPoll) {
+      matrix.begin();
+    }
     ir_sensor_poll(sstates, astates);
     if (millis() - astates.last_update_time >= US_POLL_TIMEFRAME || sstates.firstPoll) {
       ultrasonic_poll(work, sstates, astates);
@@ -39,30 +42,21 @@ void SensorManager::probe(int work, sensor_states &sstates, arduino_states &asta
 void SensorManager::ir_sensor_poll(sensor_states &sstates, arduino_states &astates) {
   int left_intensity = digitalRead(LEYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
   int right_intensity = digitalRead(REYE) != HIGH ? SENSOR_LOW : SENSOR_HIGH;
-
-  // Check if Left or Right IR Sensor intensity is different from the current sensor states
-  // If intensity is different, log the state change and update the stored states
   if (left_intensity != sstates.ir_left) {
-    //Serial.println("sensor_event: left state changed!");
     sstates.ir_left = left_intensity;
     if (left_intensity == SENSOR_HIGH) {
       changeMotor(LEFT_MOTOR_ENABLE, sstates, astates);
-      //Serial.println("Left motor enabled!");
     } else if (left_intensity == SENSOR_LOW) {
       changeMotor(LEFT_MOTOR_TURN, sstates, astates);
-      //Serial.println("Left motor disabled!");
     }
   }
 
   if (right_intensity != sstates.ir_right) {
-    //Serial.println("sensor_event: right state changed!");
     sstates.ir_right = right_intensity;
     if (right_intensity == SENSOR_HIGH) {
       changeMotor(RIGHT_MOTOR_ENABLE, sstates, astates);
-      //Serial.println("Right motor enabled!");
     } else if (right_intensity == SENSOR_LOW) {
       changeMotor(RIGHT_MOTOR_TURN, sstates, astates);
-      //Serial.println("Right motor disabled!");
     }
   }
 }
@@ -73,11 +67,9 @@ void SensorManager::ir_sensor_poll(sensor_states &sstates, arduino_states &astat
 void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_states &astates) {
   int leftSpeed, rightSpeed;
   if (!sstates.pidEnabled) {
-    //Serial.println("pidEnabled: false");
     leftSpeed = sstates.left_motor_speed;
     rightSpeed = sstates.right_motor_speed;
   } else {
-    //Serial.println("pidEnabled: true");
     leftSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef * PID_MULTIPLE);
     rightSpeed = MOTOR_SPEED_PID + abs(sstates.pidCoef * PID_MULTIPLE);
   }
@@ -85,9 +77,9 @@ void SensorManager::changeMotor(int motor, sensor_states &sstates, arduino_state
     leftSpeed = 200;
     rightSpeed = 200;
   }
-  if (leftSpeed > 180 || rightSpeed > 180) {
-    leftSpeed = 180;
-    rightSpeed = 180;
+  if (leftSpeed > 200 || rightSpeed > 200) {
+    leftSpeed = 200;
+    rightSpeed = 200;
   }
   if (motor == LEFT_MOTOR_ENABLE) {
     analogWrite(L_MOTOR_EN, leftSpeed);
@@ -121,21 +113,19 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
   // incase changes have occurred
   // Check distance with ultrasonic sensor
   if (work == BUGGY_WORK) {
+    if (sstates.pidEnabled) {
+      matrix.renderBitmap(pid_frame, 8, 12);
+    } else {
+      matrix.renderBitmap(obj_frame, 8, 12);
+    }
     int distance = getUltrasonicDistance(sstates);
-
     sstates.usdist = distance;
-
-    //Serial.print("Distance detected: ");
-    //Serial.print(distance);
-    //Serial.println(" cm");
-
     if (distance < 20.0) {
-      //Serial.println("YOU NEED TO STOP!");
       changeMotor(LEFT_MOTOR_DISABLE, sstates, astates);
       changeMotor(RIGHT_MOTOR_DISABLE, sstates, astates);
       sstates.pidEnabled = true;
       return;
-    } else if (distance < 30.0) {
+    } else if (distance < 35.0) {
       sstates.pidCoef = computePID(distance, astates, sstates);
       sstates.pidEnabled = true;
       sstates.converted_reference_speed = INITIAL_REF_SPEED;
@@ -234,19 +224,15 @@ void SensorManager::calculateBuggySpeed(sensor_states &sstates, arduino_states &
 }
 
 void SensorManager::alignBuggySpeed(sensor_states &sstates, arduino_states &astates) {
-  int newSpeed = sstates.converted_reference_speed;
-  //Serial.print("abs_diff: ");
-  //Serial.println(abs(sstates.reference_speed - astates.avg_v));
-  //Serial.print("motor_speed: ");
-  //Serial.println(sstates.left_motor_speed);
+  int newSpeed = sstates.converted_reference_speed;;
   if (sstates.reference_speed > astates.avg_v) {
     newSpeed += 10;
   } else {
     newSpeed -= 10;
   }
   if (newSpeed >= 0) {
-    if (newSpeed > 180) {
-      newSpeed = 180;
+    if (newSpeed > 200) {
+      newSpeed = 200;
     }
     sstates.converted_reference_speed = newSpeed;
     sstates.left_motor_speed = newSpeed;
