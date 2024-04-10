@@ -36,6 +36,8 @@ void SensorManager::probe(int work, sensor_states &sstates, arduino_states &asta
         sstates.firstPoll = false;
       }
     }
+  } else if (!sstates.firstPoll) {
+    matrix.renderBitmap(off_frame, 8, 12);
   }
 }
 
@@ -113,17 +115,13 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
   // incase changes have occurred
   // Check distance with ultrasonic sensor
   if (work == BUGGY_WORK) {
-    if (sstates.pidEnabled) {
-      matrix.renderBitmap(pid_frame, 8, 12);
-    } else {
-      matrix.renderBitmap(obj_frame, 8, 12);
-    }
     int distance = getUltrasonicDistance(sstates);
     sstates.usdist = distance;
     if (distance < 20.0) {
       changeMotor(LEFT_MOTOR_DISABLE, sstates, astates);
       changeMotor(RIGHT_MOTOR_DISABLE, sstates, astates);
       sstates.pidEnabled = true;
+      matrix.renderBitmap(off_frame, 8, 12);
       return;
     } else if (distance < 35.0) {
       sstates.pidCoef = computePID(distance, astates, sstates);
@@ -131,6 +129,11 @@ void SensorManager::ultrasonic_poll(int work, sensor_states &sstates, arduino_st
       sstates.converted_reference_speed = INITIAL_REF_SPEED;
     } else {
       sstates.pidEnabled = false;
+    }
+    if (sstates.pidEnabled) {
+      matrix.renderBitmap(pid_frame, 8, 12);
+    } else {
+      matrix.renderBitmap(obj_frame, 8, 12);
     }
     if (sstates.ir_left == SENSOR_HIGH) {
       changeMotor(LEFT_MOTOR_ENABLE, sstates, astates);
