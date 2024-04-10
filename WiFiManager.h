@@ -13,7 +13,7 @@ class WiFiManager {
     void setupWiFi();
     void probe(arduino_states &astates, sensor_states &sstates);
     void messageClient(String message);
-    int startStopCommandReceived(sensor_states &sstates);
+    int startStopCommandReceived(sensor_states &sstates, arduino_states &astates, SensorManager &sensors);
   private:
     void printCurrentInfo(arduino_states &astates, sensor_states &sstates);
     WiFiServer server;

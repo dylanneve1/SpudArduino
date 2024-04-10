@@ -45,13 +45,15 @@ void WiFiManager::messageClient(String message) {
 }
 
 // Function to check for start stop command
-int WiFiManager::startStopCommandReceived(sensor_states &sstates) {
+int WiFiManager::startStopCommandReceived(sensor_states &sstates, arduino_states &astates, SensorManager &sensors) {
   int work;
   if (WIFI_ENABLED == 0) {
     sstates.reference_speed = 40;
     return 1;
   }
   if (client.available()) {
+    sensors.changeMotor(LEFT_MOTOR_DISABLE, sstates, astates);
+    sensors.changeMotor(RIGHT_MOTOR_DISABLE, sstates, astates);
     String command_e = client.readStringUntil('\n');
     char ch;
     int l = command_e.length();
